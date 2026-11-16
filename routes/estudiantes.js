@@ -1,0 +1,95 @@
+
+const router = require('express').Router();
+const fs = require('fs');
+const path = require('path');
+const db = require('../db');
+const { requireLogin, requireAdmin } = require('../middleware/auth');
+
+
+const RAIZ = path.join(__dirname, '..');
+
+// Listar estudiantes
+router.get('/', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT e.id, e.nombre, e.documento, e.fecha_registro, (r.id IS NOT NULL) AS tiene_foto
+       FROM estudiantes e LEFT JOIN rostros r ON r.estudiante_id = e.id
+       ORDER BY e.id DESC`);
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// Ver la foto de un estudiante (solo con sesión; las fotos no son públicas)
+router.get('/:id/foto', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT foto_ruta FROM rostros WHERE estudiante_id = ?', [req.params.id]);
+    if (!rows[0] || !rows[0].foto_ruta) return res.status(404).end();
+    res.sendFile(path.resolve(RAIZ, rows[0].foto_ruta));
+  } catch (e) {
+    res.status(500).end();
+  }
+});
+
+//registrar estudiante con autorización y foto
+router.post('/', async (req, res) => {
+  const { nombre, documento, autorizacion, foto, descriptor } = req.body || {};
+
+  if (!nombre || !documento) {
+    return res.status(400).json({ error: 'Complete todos los campos obligatorios' });
+  }
+  if (!autorizacion) {   // SCRUM-13: sin autorización no se registra
+    return res.status(400).json({ error: 'Debe aceptar el uso de datos para continuar' });
+  }
+  if (typeof foto !== 'string' || !foto.startsWith('data:image/jpeg;base64,')) {   // SCRUM-12
+    return res.status(400).json({ error: 'Debe tomar la foto del rostro' });
+  }
+  // Sprint verificación facial: el descriptor son los 128 números que identifican el rostro
+  const descriptorOk = Array.isArray(descriptor) && descriptor.length === 128 &&
+                       descriptor.every(n => typeof n === 'number' && Number.isFinite(n));
+  if (!descriptorOk) {
+    return res.status(400).json({ error: 'No se detectó un rostro en la foto. Tómela de nuevo' });
+  }
+
+  const conn = await db.getConnection();
+  let rutaArchivo = null;
+  try {
+    // Transacción: se guarda todo junto o no se guarda nada
+    await conn.beginTransaction();
+
+    const [r] = await conn.query(
+      'INSERT INTO estudiantes (nombre, documento, codigo_qr) VALUES (?, ?, ?)',
+      [nombre.trim(), documento.trim(), 'QR-' + documento.trim()]);
+    const id = r.insertId;
+
+    await conn.query(
+      'INSERT INTO autorizaciones (estudiante_id, aceptada) VALUES (?, TRUE)', [id]);
+
+    const base64 = foto.replace(/^data:image\/jpeg;base64,/, '');
+    const rutaRelativa = 'uploads/' + id + '.jpg';
+    rutaArchivo = path.join(RAIZ, rutaRelativa);
+    fs.writeFileSync(rutaArchivo, Buffer.from(base64, 'base64'));
+
+    await conn.query(
+      'INSERT INTO rostros (estudiante_id, foto_ruta, descriptor) VALUES (?, ?, ?)',
+      [id, rutaRelativa, JSON.stringify(descriptor)]);
+
+    await conn.commit();
+    res.status(201).json({ ok: true, id });
+  } catch (e) {
+    await conn.rollback();
+    if (rutaArchivo && fs.existsSync(rutaArchivo)) fs.unlinkSync(rutaArchivo);
+    if (e.code === 'ER_DUP_ENTRY') {   // documento repetido (UNIQUE en la base de datos)
+      return res.status(409).json({ error: 'El estudiante ya está registrado' });
+    }
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
+  } finally {
+    conn.release();
+  }
+});
+
+module.exports = router;

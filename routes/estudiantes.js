@@ -5,12 +5,9 @@ const path = require('path');
 const db = require('../db');
 const { requireLogin, requireAdmin } = require('../middleware/auth');
 
-<<<<<<< HEAD
-=======
 //todo lo que está debajo exige sesión iniciada y rol administrador
 router.use(requireLogin);
 router.use(requireAdmin);
->>>>>>> SCRUM-29-Protección-de-datos-faciales
 
 const RAIZ = path.join(__dirname, '..');
 

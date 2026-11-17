@@ -118,8 +118,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-=======
 // eliminar estudiante
 router.delete('/:id', async (req, res) => {
   try {
@@ -141,5 +139,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
->>>>>>> SCRUM-36-Eliminar-estudiante
 module.exports = router;

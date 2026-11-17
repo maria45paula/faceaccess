@@ -5,12 +5,9 @@ const path = require('path');
 const db = require('../db');
 const { requireLogin, requireAdmin } = require('../middleware/auth');
 
-<<<<<<< HEAD
-=======
 //todo lo que está debajo exige sesión iniciada y rol administrador
 router.use(requireLogin);
 router.use(requireAdmin);
->>>>>>> SCRUM-29-Protección-de-datos-faciales
 
 const RAIZ = path.join(__dirname, '..');
 
@@ -95,6 +92,29 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   } finally {
     conn.release();
+  }
+});
+
+//editar estudiante
+router.put('/:id', async (req, res) => {
+  const { nombre, documento } = req.body || {};
+  if (!nombre || !documento) {
+    return res.status(400).json({ error: 'Complete todos los campos obligatorios' });
+  }
+  try {
+    const [r] = await db.query(
+      'UPDATE estudiantes SET nombre = ?, documento = ? WHERE id = ?',
+      [nombre.trim(), documento.trim(), req.params.id]);
+    if (r.affectedRows === 0) {
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    if (e.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Ya existe un estudiante con ese documento' });
+    }
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 

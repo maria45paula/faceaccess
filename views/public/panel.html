@@ -117,6 +117,20 @@
       return { ok: resp.ok, datos };
     }
 
+<<<<<<< HEAD
+=======
+    // iniciar sesion y cerrar sesion
+    async function verificarSesion() {
+      const r = await api('/api/auth/me');
+      el('quien').textContent = r.datos.nombre + ' (' + r.datos.rol + ') ';
+    }
+
+    el('btnSalir').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+
+>>>>>>> SCRUM-22-Iniciar-sesión
     // Modelos de reconocimiento facial (se cargan una sola vez)
     async function cargarModelos() {
       try {

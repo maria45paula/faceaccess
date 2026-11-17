@@ -118,4 +118,28 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+// eliminar estudiante
+router.delete('/:id', async (req, res) => {
+  try {
+    const [fotos] = await db.query(
+      'SELECT foto_ruta FROM rostros WHERE estudiante_id = ?', [req.params.id]);
+    const [r] = await db.query('DELETE FROM estudiantes WHERE id = ?', [req.params.id]);
+    if (r.affectedRows === 0) {
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
+    }
+    // Se borra también el archivo de la foto
+    if (fotos[0] && fotos[0].foto_ruta) {
+      const archivo = path.join(RAIZ, fotos[0].foto_ruta);
+      if (fs.existsSync(archivo)) fs.unlinkSync(archivo);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+>>>>>>> SCRUM-36-Eliminar-estudiante
 module.exports = router;

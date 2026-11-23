@@ -52,7 +52,30 @@
             let modelosListos=false;
             let camaraLista=false;
 
+<<<<<<< HEAD
             const dormir =ms => new Promise(r=> setTimeout(r, ms));
 
+=======
+            const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+            // Muestra un mensaje grande. tipo: 'info' 'ok' 'error'
+            function mostrar(tipo, titulo, detalle) {
+            el('resultado').className = 'resultado ' + tipo;
+            el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
+            el('titulo').textContent = titulo;
+            el('detalle').textContent = detalle || '';
+            }
+
+            async function abrirCamara() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                camaraLista = true;
+            } catch (e) {
+                mostrar('error', 'No se pudo acceder a la cámara',
+                        'Revise los permisos del navegador. Si no es posible, use el ingreso alternativo.');
+            }
+            }
+>>>>>>> SCRUM-15-Abrir-la-cámara
 
             

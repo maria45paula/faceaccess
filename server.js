@@ -16,8 +16,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, maxAge: 1000 * 60 * 30 }   // la sesión dura 30 minutos
 }));
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'views', 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/estudiantes', require('./routes/estudiantes'));
 app.use('/api/ingreso', require('./routes/ingreso'));

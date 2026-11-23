@@ -1,4 +1,4 @@
-onst router = require('express').Router();
+const router = require('express').Router();
 const db = require('../db');
 
 // Distancia máxima para aceptar un rostro. Más bajo = más estricto; más alto = deja pasar a más gente.

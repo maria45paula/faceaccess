@@ -26,7 +26,11 @@
     .nota { font-size: 16px; text-align: center; color: #333; }
     </style>
 </head>
+<<<<<<< HEAD
 <body>
+=======
+    <body>
+>>>>>>> SCRUM-18-Guardar-el-intento-de-ingreso
         <main>
             <h1>FaceAccess · Ingreso</h1>
             <video id="video" autoplay playsinline muted arial-label="vista de la camara"></video>
@@ -91,4 +95,72 @@
                 }
             }
 
+<<<<<<< HEAD
+=======
+            async function verificar() {
+                btn.disabled = true;
+                el('tiempo').textContent = '';
+                mostrar('info', 'Buscando su rostro…', 'Mire a la cámara.');
+
+                // Se intenta detectar un rostro cada medio segundo, hasta 10 segundos
+                const inicioBusqueda = performance.now();
+                let deteccion = null;
+                let inicioIntento = 0;
+                while (performance.now() - inicioBusqueda < TIEMPO_MAXIMO_BUSQUEDA) {
+                    inicioIntento = performance.now();   // SCRUM-28: el cronómetro cuenta desde el intento exitoso
+                    deteccion = await faceapi
+                    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
+                    if (deteccion) break;
+                    await dormir(500);
+                }
+
+                if (!deteccion) {   // pasaron 10 s sin ver un rostro
+                    mostrar('error', 'No se detectó su rostro', 'Acérquese o mejore la luz y pulse «Verificar identidad» de nuevo.');
+                    btn.disabled = false;
+                    return;
+                }
+
+                mostrar('info', 'Verificando…', '');   // se ve si la respuesta tarda más de lo esperado
+
+                try {
+                    const resp = await fetch('/api/ingreso/verificar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ descriptor: Array.from(deteccion.descriptor) })
+                    });
+                    const datos = await resp.json();
+                    const tiempo = Math.round(performance.now() - inicioIntento);
+
+                    if (!resp.ok) {
+                    mostrar('error', 'No se pudo completar', datos.error + '. Pulse «Verificar identidad» para reintentar.');
+                    } else if (datos.resultado === 'permitido') {
+                    mostrar('ok', 'Acceso permitido', 'Bienvenido(a), ' + datos.nombre);
+                    } else {
+                    mostrar('error', 'Acceso denegado', 'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
+                    }
+
+                    // este es del scrum 28 evidencia de rapidez
+                    console.log('Tiempo de verificación (ms):', tiempo);
+                    el('tiempo').textContent = 'Tiempo de verificación: ' + tiempo + ' ms' +
+                    (tiempo > META_RAPIDEZ ? ' (superó la meta de 3 s)' : '');
+                } catch (e) {
+                    mostrar('error', 'No se pudo conectar con el servidor', 'Revise la conexión y pulse «Verificar identidad» para reintentar.');
+                }
+                btn.disabled = false;
+            }
+
+            btn.addEventListener('click', verificar);
+
+            // Arranque: cámara y modelos en paralelo
+            mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
+            Promise.all([abrirCamara(), cargarModelos()]).then(listoParaVerificar);
+        </script>
+    </body>
+</html>
+
+
+
+>>>>>>> SCRUM-18-Guardar-el-intento-de-ingreso
             

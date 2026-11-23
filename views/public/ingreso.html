@@ -16,5 +16,13 @@
     button:disabled { background: #777; cursor: not-allowed; }
     :focus-visible { outline: 4px solid #ffb000; outline-offset: 2px; }
 
+    .resultado { border-radius: 12px; padding: 20px; text-align: center; border: 3px solid var(--borde); background: var(--info); }
+    .resultado.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .resultado.error { background: var(--error); color: #fff; border-color: var(--error); }
+    .resultado .icono { font-size: 64px; line-height: 1; }
+    .resultado .titulo { font-size: 40px; font-weight: bold; margin: 8px 0; }
+    .resultado .detalle { font-size: 22px; margin: 0; }
+    #tiempo { text-align: center; font-size: 16px; color: #333; min-height: 1.2em; }
+    .nota { font-size: 16px; text-align: center; color: #333; }
     </style>
 </head>

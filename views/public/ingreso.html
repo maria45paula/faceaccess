@@ -55,10 +55,4 @@
             const dormir =ms => new Promise(r=> setTimeout(r, ms));
 
 
-            //Seccion para mostrar un mensaje grande ya sea error, info, ok
-            function mostrar(tipo, titulo,detalle){
-                el('resultado').className = 'resultado ' + tipo;
-                el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
-                el('titulo').textContent = titulo;
-                el('detalle').textContent = detalle || '';
-            }
+            

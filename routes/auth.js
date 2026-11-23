@@ -1,4 +1,4 @@
-// SCRUM-22 (iniciar sesión) y SCRUM-25 (cerrar sesión)
+
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const db = require('../db');

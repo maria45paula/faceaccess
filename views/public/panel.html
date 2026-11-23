@@ -117,11 +117,6 @@
       return { ok: resp.ok, datos };
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> SCRUM-12-capturar-foto-del-rostro
     // iniciar sesion y cerrar sesion
     async function verificarSesion() {
       const r = await api('/api/auth/me');
@@ -133,17 +128,14 @@
       window.location.href = '/login.html';
     });
 
-<<<<<<< HEAD
->>>>>>> SCRUM-22-Iniciar-sesión
-=======
+
     // Camara y foto
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => { video.srcObject = stream; })
       .catch(() => avisar('No se pudo acceder a la cámara. Revise los permisos del navegador.', 'error'));
 
 
->>>>>>> SCRUM-12-capturar-foto-del-rostro
-    // Modelos de reconocimiento facial (se cargan una sola vez)
+  // Modelos de reconocimiento facial (se cargan una sola vez)
     async function cargarModelos() {
       try {
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models');

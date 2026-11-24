@@ -2,6 +2,7 @@
 const router = require('express').Router();
 const fs = require('fs');
 const path = require('path');
+const QRCode = require('qrcode');
 const db = require('../db');
 const { requireLogin, requireAdmin } = require('../middleware/auth');
 
@@ -33,6 +34,19 @@ router.get('/:id/foto', async (req, res) => {
     if (!rows[0] || !rows[0].foto_ruta) return res.status(404).end();
     res.sendFile(path.resolve(RAIZ, rows[0].foto_ruta));
   } catch (e) {
+    res.status(500).end();
+  }
+});
+
+router.get('/:id/qr', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT codigo_qr FROM estudiantes WHERE id = ?', [req.params.id]);
+    if (!rows[0] || !rows[0].codigo_qr) return res.status(404).end();
+    const png = await QRCode.toBuffer(rows[0].codigo_qr, { width: 320, margin: 2 });
+    res.set('Cache-Control', 'no-store');   // el QR es una credencial: que el navegador no lo guarde
+    res.type('png').send(png);
+  } catch (e) {
+    console.error(e);
     res.status(500).end();
   }
 });

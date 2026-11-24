@@ -68,4 +68,19 @@ router.post('/verificar', async (req, res) => {
   }
 });
 
+router.post('/qr', async (req, res) => {
+  const { codigo } = req.body || {};
+  if (typeof codigo !== 'string' || !codigo.trim() || codigo.length > 100) {
+    return res.status(400).json({ error: 'No se recibió un código QR válido' });
+  }
+  try {
+    const [filas] = await db.query(
+      'SELECT id, nombre FROM estudiantes WHERE codigo_qr = ? AND activo = TRUE', [codigo.trim()]);
+    await responderIntento(res, filas[0] || null, 'qr');
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 module.exports = router;

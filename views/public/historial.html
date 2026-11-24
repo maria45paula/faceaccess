@@ -116,7 +116,14 @@
       window.location.href = '/login.html';
     });
 
-
+    function filtrosActivos() {
+      const q = new URLSearchParams();
+      ['desde', 'hasta', 'metodo', 'resultado', 'estudiante'].forEach(id => {   // el id de cada campo = nombre del filtro
+        const valor = el(id).value.trim();
+        if (valor) q.set(id, valor);
+      });
+      return q;
+    }
 
 
 
@@ -162,7 +169,8 @@
     });
 
     verificarSesion().then(cargarHistorial);
-  </script>
     
+    
+  </script>
 </body>
 </html>

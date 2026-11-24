@@ -120,7 +120,7 @@
 
 
 
-        async function cargarHistorial() {
+    async function cargarHistorial() {
       const filtros = filtrosActivos();
       const r = await api('/api/historial' + (filtros.toString() ? '?' + filtros : ''));
       const cuerpo = el('lista');

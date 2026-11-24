@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FaceAccess · Historial de ingresos</title>
+  <style>
+    :root { --texto:#111; --primario:#0b4f8a; --peligro:#a40000; --ok:#0a6b2d; --borde:#444; }
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 1.125rem; color: var(--texto); margin: 0; background: #fff; }
+    header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+             padding: 14px 20px; background: var(--primario); color: #fff; }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header a { color: #fff; font-weight: bold; margin-right: 12px; }
+    main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    section { border: 2px solid var(--borde); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    h2 { margin-top: 0; }
+    button { font-size: 1.125rem; padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; background: var(--primario); }
+    button.salir { background: #fff; color: var(--primario); font-weight: bold; }
+    :focus-visible { outline: 4px solid #ffb000; outline-offset: 2px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--borde); padding: 8px; text-align: left; vertical-align: middle; }
+    th { background: #e8eef5; }
+    td.permitido { color: var(--ok); font-weight: bold; }      /* el color acompaña al ícono y al texto, no los reemplaza */
+    td.denegado { color: var(--peligro); font-weight: bold; }
+    .tabla-scroll { overflow-x: auto; }
+    #total { font-weight: bold; min-height: 1.4em; }
+
+    .filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    label { display: block; font-weight: bold; margin-bottom: 6px; }
+    input, select { width: 100%; font-size: 1.125rem; padding: 10px; border: 2px solid var(--borde); border-radius: 8px; background: #fff; color: var(--texto); }
+    button.gris { background: #555; }
+    .acciones { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+  </style>
+  <link rel="stylesheet" href="/css/accesibilidad.css">
+  <script src="/js/accesibilidad.js"></script>
+</head>
+<body>
+  <header>
+    <h1>FaceAccess · Historial de ingresos</h1>
+    <div>
+      <span id="quien"></span>
+      <a href="/panel.html">Volver al panel</a>
+      <button class="salir" id="btnSalir">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="tituloFiltros">
+      <h2 id="tituloFiltros">Filtrar ingresos</h2>
+      <form id="formFiltros">
+        <div class="filtros">
+          <div><label for="desde">Desde</label><input type="date" id="desde"></div>
+          <div><label for="hasta">Hasta</label><input type="date" id="hasta"></div>
+          <div>
+            <label for="metodo">Método</label>
+            <select id="metodo">
+              <option value="">Todos</option>
+              <option value="rostro">Reconocimiento facial</option>
+              <option value="qr">Código QR</option>
+              <option value="documento">Documento</option>
+            </select>
+          </div>
+          <div>
+            <label for="resultado">Resultado</label>
+            <select id="resultado">
+              <option value="">Todos</option>
+              <option value="permitido">Permitido</option>
+              <option value="denegado">Denegado</option>
+            </select>
+          </div>
+          <div><label for="estudiante">Estudiante (nombre o documento)</label><input type="text" id="estudiante" autocomplete="off"></div>
+        </div>
+        <div class="acciones">
+          <button type="submit">Buscar</button>
+          <button type="button" id="btnLimpiar" class="gris">Limpiar filtros</button>
+        </div>
+      </form>
+    </section>
+    
+    <section aria-labelledby="tituloLista">
+      <h2 id="tituloLista">Ingresos registrados</h2>
+      <p id="total" aria-live="polite"></p>
+      <div class="tabla-scroll">
+        <table aria-labelledby="tituloLista">
+          <thead>
+            <tr><th scope="col">Fecha y hora</th><th scope="col">Estudiante</th><th scope="col">Documento</th>
+                <th scope="col">Método</th><th scope="col">Resultado</th></tr>
+          </thead>
+          <tbody id="lista"></tbody>
+        </table>
+      </div>
+      <p>Se muestran como máximo los 500 ingresos más recientes.</p>
+    </section>
+  </main>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const METODOS = { rostro: 'Reconocimiento facial', qr: 'Código QR', documento: 'Documento' };
+
+    // Llamada a la API; si la sesión venció, vuelve al login
+    async function api(url, opciones) {
+      const resp = await fetch(url, opciones);
+      if (resp.status === 401) { window.location.href = '/login.html'; throw new Error('Sin sesión'); }
+      const datos = await resp.json().catch(() => ({}));
+      return { ok: resp.ok, datos };
+    }
+
+    async function verificarSesion() {
+      const r = await api('/api/auth/me');
+      el('quien').textContent = r.datos.nombre + ' (' + r.datos.rol + ') ';
+    }
+
+    el('btnSalir').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+
+
+
+
+
+    async function cargarHistorial() {
+      const filtros = filtrosActivos();
+      const r = await api('/api/historial' + (filtros.toString() ? '?' + filtros : ''));
+      const cuerpo = el('lista');
+      cuerpo.innerHTML = '';
+
+      if (!r.ok) {
+        el('total').textContent = r.datos.error || 'No se pudo cargar el historial.';
+        return;
+      }
+      el('total').textContent = r.datos.length + (r.datos.length === 1 ? ' ingreso' : ' ingresos');
+
+      if (!r.datos.length) {
+        const celda = cuerpo.insertRow().insertCell();
+        celda.colSpan = 5;
+        celda.textContent = filtros.toString() ? 'No hay ingresos que coincidan con los filtros.' : 'Todavía no hay ingresos registrados.';
+        return;
+      }
+
+      r.datos.forEach(i => {
+        const fila = cuerpo.insertRow();
+        fila.insertCell().textContent = i.fecha_hora;      // textContent evita inyectar HTML
+        // Sin nombre: o fue un intento no reconocido, o el estudiante se eliminó después de ingresar
+        fila.insertCell().textContent = i.nombre || (i.resultado === 'permitido' ? 'Estudiante eliminado' : 'No identificado');
+        fila.insertCell().textContent = i.documento || '—';
+        fila.insertCell().textContent = METODOS[i.metodo] || i.metodo;
+        const celdaResultado = fila.insertCell();
+        celdaResultado.textContent = i.resultado === 'permitido' ? '✔ Permitido' : '✘ Denegado';   // ícono + texto
+        celdaResultado.className = i.resultado;
+      });
+    }
+
+    el('formFiltros').addEventListener('submit', e => {   // submit permite usar también la tecla Enter
+      e.preventDefault();
+      cargarHistorial();
+    });
+    el('btnLimpiar').addEventListener('click', () => {
+      el('formFiltros').reset();
+      cargarHistorial();
+    });
+
+    verificarSesion().then(cargarHistorial);
+  </script>
+    
+</body>
+</html>

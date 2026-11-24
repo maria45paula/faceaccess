@@ -16,9 +16,11 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, maxAge: 1000 * 60 * 30 }   // la sesión dura 30 minutos
 }));
+
 app.use(express.static(path.join(__dirname, 'views', 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/estudiantes', require('./routes/estudiantes'));
 app.use('/api/ingreso', require('./routes/ingreso'));
+app.use('/api/historial', require('./routes/historial'));   // SCRUM-23 / SCRUM-24
 
 app.listen(3000, () => console.log('FaceAccess en http://localhost:3000/login.html'));

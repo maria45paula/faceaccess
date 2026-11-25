@@ -199,6 +199,9 @@
 
         const celdaAcc = fila.insertCell();
         celdaAcc.className = 'acc';
+        const bQR = document.createElement('button');
+        bQR.textContent = 'Ver QR';
+        bQR.addEventListener('click', () => verQR(e));
         const bEditar = document.createElement('button');
         bEditar.textContent = 'Editar';
         bEditar.addEventListener('click', () => iniciarEdicion(e));
@@ -206,8 +209,7 @@
         bEliminar.textContent = 'Eliminar';
         bEliminar.className = 'peligro';
         bEliminar.addEventListener('click', () => eliminar(e));
-        celdaAcc.append(bEditar, bEliminar);
-      });
+        celdaAcc.append(bEditar, bQR, bEliminar);      });
     }
 
     el('btnGuardar').addEventListener('click', async () => {

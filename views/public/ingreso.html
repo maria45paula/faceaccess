@@ -6,24 +6,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FaceAccess · Ingreso</title>
   <style>
-    :root { --texto:#111; --borde:#444; --primario:#0b4f8a; --ok:#0a6b2d; --error:#a40000; --info:#e8eef5; }
+    :root {
+      --azul: #287fbd;
+      --azul-oscuro: #14558f;
+      --azul-profundo: #103f70;
+      --texto: #17334c;
+      --borde: #d2e2ee;
+      --ok: #08723b;
+      --error: #a40000;
+      --info: #eaf6ff;
+      --sombra: 0 12px 30px rgba(22, 73, 119, .16);
+    }
     * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; font-size: 20px; color: var(--texto); margin: 0; padding: 16px; background: #fff; }
-    main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-    h1 { margin: 0; font-size: 28px; text-align: center; }
-    video { width: 100%; border: 3px solid var(--borde); border-radius: 12px; background: #ddd; }
-    button { font-size: 24px; padding: 16px; border: 0; border-radius: 10px; background: var(--primario); color: #fff; cursor: pointer; }
-    button:disabled { background: #777; cursor: not-allowed; }
-    :focus-visible { outline: 4px solid #ffb000; outline-offset: 2px; }
+    body {
+      min-height: 100vh; margin: 0; padding: 28px 16px 40px;
+      font-family: Arial, Helvetica, sans-serif; color: var(--texto);
+      background: linear-gradient(125deg, #6eabe5 0%, #8cccf1 48%, #b1eafa 100%);
+    }
+    .pagina { width: min(1100px, 100%); margin: 0 auto; }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; flex-wrap: wrap; margin-bottom: 22px; padding: 17px 22px;
+      border: 1px solid rgba(255,255,255,.7); border-radius: 20px;
+      background: rgba(255,255,255,.9); box-shadow: var(--sombra);
+    }
+    .marca { display: flex; align-items: center; gap: 13px; }
+    .logo {
+      width: 64px; height: 64px; display: grid; place-items: center;
+      border: 2px solid var(--azul-profundo); border-radius: 50%;
+      background: #fff; color: var(--azul-oscuro); font-size: 19px; font-weight: 800;
+      letter-spacing: -1px;
+    }
+    h1 { margin: 0; color: var(--azul-profundo); font-size: clamp(22px, 3vw, 29px); }
+    .subtitulo { margin: 5px 0 0; color: #58758d; font-size: 14px; }
+    .cabecera-derecha { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .voz { display: inline-flex; align-items: center; gap: 7px; color: #42637d; font-size: 14px; font-weight: 600; }
+    .voz input { accent-color: var(--azul); width: 17px; height: 17px; }
+    a { color: var(--azul-oscuro); font-weight: 700; text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    .resultado { border-radius: 12px; padding: 20px; text-align: center; border: 3px solid var(--borde); background: var(--info); }
-    .resultado.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
-    .resultado.error { background: var(--error); color: #fff; border-color: var(--error); }
-    .resultado .icono { font-size: 64px; line-height: 1; }
-    .resultado .titulo { font-size: 40px; font-weight: bold; margin: 8px 0; }
-    .resultado .detalle { font-size: 22px; margin: 0; }
-    #tiempo { text-align: center; font-size: 16px; color: #333; min-height: 1.2em; }
-    .nota { font-size: 16px; text-align: center; color: #333; }
+    .introduccion { margin: 0 0 18px; text-align: center; color: #174c78; }
+    .introduccion h2 { margin: 0 0 7px; font-size: clamp(20px, 3vw, 25px); }
+    .introduccion p { margin: 0; font-size: 15px; }
+
+    .metodos {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px; align-items: stretch;
+    }
+    .metodo {
+      min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 13px;
+      border: 1px solid rgba(255,255,255,.9); border-radius: 20px;
+      background: rgba(255,255,255,.95); box-shadow: var(--sombra);
+    }
+    .metodo-cabecera { display: flex; align-items: center; gap: 11px; }
+    .icono-metodo {
+      width: 43px; height: 43px; flex: 0 0 43px; display: grid; place-items: center;
+      border-radius: 13px; background: #e5f4ff; color: var(--azul-oscuro);
+      font-size: 23px;
+    }
+    .metodo h3 { margin: 0; color: var(--azul-profundo); font-size: 18px; }
+    .numero { margin: 3px 0 0; color: #7b94a8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .descripcion { min-height: 42px; margin: 0; color: #587187; font-size: 14px; line-height: 1.5; }
+    video {
+      display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+      border: 2px solid #c8ddeb; border-radius: 14px; background: #e5edf3;
+    }
+    button {
+      width: 100%; min-height: 46px; padding: 11px 16px;
+      border: 1px solid #0f5794; border-radius: 999px;
+      background: linear-gradient(180deg, #4c9bd4, #1768a8);
+      box-shadow: 0 4px 0 #104b80, 0 7px 13px rgba(15,78,130,.16);
+      color: #fff; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700;
+      transition: transform .15s, filter .15s;
+    }
+    button:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #104b80; }
+    button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+    input[type="text"] {
+      width: 100%; min-height: 46px; padding: 11px 15px;
+      border: 1.5px solid var(--borde); border-radius: 999px;
+      background: #fff; color: var(--texto); font: inherit; font-size: 15px;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(40,127,189,.15); }
+    .form-documento { display: flex; flex-direction: column; gap: 9px; margin-top: auto; }
+    .form-documento label { color: #31536e; font-size: 14px; font-weight: 700; }
+    .nota-metodo {
+      margin-top: auto; padding: 11px 12px; border-radius: 12px;
+      background: #f0f8fd; color: #5a7890; font-size: 13px; line-height: 1.45;
+    }
+    .resultado {
+      margin-top: 20px; padding: 20px; text-align: center;
+      border: 1px solid #c9ddeb; border-radius: 20px;
+      background: rgba(255,255,255,.95); box-shadow: var(--sombra);
+    }
+    .resultado.ok { background: #e7f7ee; border-color: #9bd3b1; color: #075d30; }
+    .resultado.error { background: #fff0f0; border-color: #e2aaaa; color: #8c1111; }
+    .resultado .icono { font-size: 42px; line-height: 1; }
+    .resultado .titulo { margin: 7px 0; font-size: clamp(22px, 4vw, 30px); font-weight: 800; }
+    .resultado .detalle { margin: 0; font-size: 15px; line-height: 1.45; }
+    #tiempo { min-height: 1.3em; margin: 12px 0 0; text-align: center; color: #315b79; font-size: 13px; }
+    .pie { margin-top: 22px; text-align: center; font-size: 14px; }
+    :focus-visible { outline: 3px solid #ffb000; outline-offset: 3px; }
+
+    @media (max-width: 850px) {
+      .metodos { grid-template-columns: 1fr 1fr; }
+      .metodo-documento { grid-column: 1 / -1; }
+    }
+    @media (max-width: 580px) {
+      body { padding: 13px 10px 28px; }
+      header { padding: 14px; }
+      .logo { width: 54px; height: 54px; }
+      .cabecera-derecha { width: 100%; }
+      .metodos { grid-template-columns: 1fr; }
+      .metodo-documento { grid-column: auto; }
+      .metodo { padding: 17px; }
+      .descripcion { min-height: 0; }
+    }
     </style>
 </head>
     <body>

@@ -68,4 +68,18 @@ router.post('/verificar', async (req, res) => {
   }
 });
 
+async function responderIntento(res, estudiante, metodo) {
+  const permitido = estudiante !== null;
+  const resultado = permitido ? 'permitido' : 'denegado';
+  try {
+    await db.query(
+      'INSERT INTO ingresos (estudiante_id, metodo, resultado) VALUES (?, ?, ?)',
+      [permitido ? estudiante.id : null, metodo, resultado]);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'No se pudo guardar el intento. Intente de nuevo' });
+  }
+  res.json({ resultado, nombre: permitido ? estudiante.nombre : null });
+}
+
 module.exports = router;

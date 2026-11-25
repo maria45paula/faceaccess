@@ -44,17 +44,41 @@
                 <p>Si el reconocimiento facial no funciona, puede ingresar con su código QR o con su documento. El resultado y el trato son los mismos.</p>
                 <button id="btnQR" type="button" disabled>Escanear código QR</button>
 
-            </main>
+        
+                <video id="video" autoplay playsinline muted arial-label="vista de la camara"></video>
+                <button id="btnVerificar" disabled>Verificar Identidad</button>
+                <div id="resultado" class="resultado info" role="alert" aria-live="assertive">
+                    <div class="icono" id="icono">..</div>
+                    <div class="titulo" id="titulo">Cargando..</div>
+                    <p class="detalle" id="detalle">Preparando el sistema</p>
+                </div>
+
+                <div id="tiempo"></div>
+                
+                <form id="formDocumento">
+                    <label for="documento">Número de documento</label>
+                    <input id="documento" type="text" autocomplete="off">
+                    <button id="btnDocumento" type="submit">Ingresar con documento</button>
+                </form>
+            </section>
+            <p class="nota"><a href="/login.html">Acceso del personal</a></p>
+        </main>
 
         <script src="/js/face-api.js"></script>
+        <script src="/js/jsQR.js"></script>
         <script>
             const el= id => document.getElementById(id);
             const video =el('video');
             const btn =el('btnVerificar');
+            const btnQR = el('btnQR');
+            const btnDoc = el('btnDocumento');
+            const inputDoc = el('documento');
             const TIEMPO_MAXIMO_BUSQUEDA=10000;
+            const TIEMPO_MAXIMO_QR = 15000; 
             const META_RAPIDEZ =3000;
             let modelosListos=false;
             let camaraLista=false;
+            let ocupado = false;  
 
             const dormir = ms => new Promise(r => setTimeout(r, ms));
 

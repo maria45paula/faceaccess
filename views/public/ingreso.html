@@ -54,12 +54,53 @@
 
             const dormir = ms => new Promise(r => setTimeout(r, ms));
 
+            const hayVoz = 'speechSynthesis' in window;
+            if (!hayVoz) el('etiquetaVoz').hidden = true;   // si el navegador no sabe hablar, se oculta la casilla
+
+            function hablar(texto) {
+            if (!hayVoz || !el('chkVoz').checked || !texto) return;
+            try {
+                const sintetizador = window.speechSynthesis;
+                if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();   // corta el mensaje anterior para no acumular
+                const mensaje = new SpeechSynthesisUtterance(texto.replace(/\(a\)|…/g, ''));   // quita "(a)" (se leería "Bienvenido a") y los puntos suspensivos
+                mensaje.lang = 'es-CO';
+                // Se prefiere una voz en español de Colombia; si no hay, cualquiera en español
+                const voces = sintetizador.getVoices();
+                const voz = voces.find(v => v.lang.replace('_', '-').toLowerCase() === 'es-co') ||
+                            voces.find(v => v.lang.toLowerCase().startsWith('es'));
+                if (voz) mensaje.voice = voz;
+                sintetizador.speak(mensaje);
+            } catch (e) {
+                console.error('No se pudo reproducir la voz:', e);   // si la voz falla, el mensaje escrito igual se ve
+            }
+            }
+
+            el('chkVoz').addEventListener('change', () => {
+            if (!el('chkVoz').checked) window.speechSynthesis.cancel();   // silenciar corta lo que esté sonando
+            else hablar('Mensajes de voz activados');
+            });
+
             // Muestra un mensaje grande. tipo: 'info' 'ok' 'error'
             function mostrar(tipo, titulo, detalle) {
-            el('resultado').className = 'resultado ' + tipo;
-            el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
-            el('titulo').textContent = titulo;
-            el('detalle').textContent = detalle || '';
+                el('resultado').className = 'resultado ' + tipo;
+                el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
+                el('titulo').textContent = titulo;
+                el('detalle').textContent = detalle || '';
+                hablar(detalle ? titulo + '. ' + detalle : titulo);
+
+            }
+
+            function actualizarBotones() {
+                btn.disabled = ocupado || !(modelosListos && camaraLista);   // el rostro necesita cámara y modelos
+                btnQR.disabled = ocupado || !camaraLista;                    // el QR solo necesita la cámara
+                btnDoc.disabled = ocupado;                                   // el documento no necesita cámara ni modelos
+                }
+
+                // Ejecuta una verificación y bloquea los botones mientras dura (evita dos a la vez)
+                async function ejecutar(accion) {
+                ocupado = true;
+                actualizarBotones();
+                try { await accion(); } finally { ocupado = false; actualizarBotones(); }
             }
 
             async function abrirCamara() {
@@ -84,72 +125,133 @@
                 }
             }
 
-            function listoParaVerificar() {
-                if (modelosListos && camaraLista) {
-                    btn.disabled = false;
-                    mostrar('info', 'Listo', 'Ubíquese frente a la cámara y pulse «Verificar identidad».');
+            function mostrarAcceso(datos, textoDenegado) {
+                if (datos.resultado === 'permitido') {
+                    mostrar('ok', 'Acceso permitido', 'Bienvenido(a), ' + datos.nombre);
+                } else {
+                    mostrar('error', 'Acceso denegado', textoDenegado);
                 }
             }
 
-            async function verificar() {
-                btn.disabled = true;
-                el('tiempo').textContent = '';
-                mostrar('info', 'Buscando su rostro…', 'Mire a la cámara.');
-
-                // Se intenta detectar un rostro cada medio segundo, hasta 10 segundos
-                const inicioBusqueda = performance.now();
-                let deteccion = null;
-                let inicioIntento = 0;
-                while (performance.now() - inicioBusqueda < TIEMPO_MAXIMO_BUSQUEDA) {
-                    inicioIntento = performance.now();   // SCRUM-28: el cronómetro cuenta desde el intento exitoso
-                    deteccion = await faceapi
-                    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-                    .withFaceLandmarks()
-                    .withFaceDescriptor();
-                    if (deteccion) break;
-                    await dormir(500);
-                }
-
-                if (!deteccion) {   // pasaron 10 s sin ver un rostro
-                    mostrar('error', 'No se detectó su rostro', 'Acérquese o mejore la luz y pulse «Verificar identidad» de nuevo.');
-                    btn.disabled = false;
-                    return;
-                }
-
-                mostrar('info', 'Verificando…', '');   // se ve si la respuesta tarda más de lo esperado
-
+            async function enviar(url, cuerpo, textoDenegado) {
                 try {
-                    const resp = await fetch('/api/ingreso/verificar', {
+                    const resp = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ descriptor: Array.from(deteccion.descriptor) })
+                    body: JSON.stringify(cuerpo)
                     });
                     const datos = await resp.json();
-                    const tiempo = Math.round(performance.now() - inicioIntento);
-
                     if (!resp.ok) {
-                    mostrar('error', 'No se pudo completar', datos.error + '. Pulse «Verificar identidad» para reintentar.');
-                    } else if (datos.resultado === 'permitido') {
-                    mostrar('ok', 'Acceso permitido', 'Bienvenido(a), ' + datos.nombre);
-                    } else {
-                    mostrar('error', 'Acceso denegado', 'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
+                    mostrar('error', 'No se pudo completar', datos.error + '. Intente de nuevo.');
+                    return false;
                     }
-
-                    // este es del scrum 28 evidencia de rapidez
-                    console.log('Tiempo de verificación (ms):', tiempo);
-                    el('tiempo').textContent = 'Tiempo de verificación: ' + tiempo + ' ms' +
-                    (tiempo > META_RAPIDEZ ? ' (superó la meta de 3 s)' : '');
+                    mostrarAcceso(datos, textoDenegado);
+                    return true;
                 } catch (e) {
-                    mostrar('error', 'No se pudo conectar con el servidor', 'Revise la conexión y pulse «Verificar identidad» para reintentar.');
+                    mostrar('error', 'No se pudo conectar con el servidor', 'Revise la conexión e intente de nuevo.');
+                    return false;
                 }
-                btn.disabled = false;
+            }
+        async function verificarRostro() {
+            el('tiempo').textContent = '';
+            mostrar('info', 'Buscando su rostro…', 'Mire a la cámara.');
+
+            const inicioBusqueda = performance.now();
+            let deteccion = null;
+            let inicioIntento = 0;
+            while (performance.now() - inicioBusqueda < TIEMPO_MAXIMO_BUSQUEDA) {
+                inicioIntento = performance.now();
+                deteccion = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+                if (deteccion) break;
+                await dormir(500);
             }
 
-            btn.addEventListener('click', verificar);
+            if (!deteccion) {   // pasaron 10 s sin ver un rostro
+                mostrar('error', 'No se detectó su rostro', 'Acérquese o mejore la luz y pulse «Verificar identidad» de nuevo.');
+                return;
+            }
 
-            // Arranque: cámara y modelos en paralelo
-            mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
-            Promise.all([abrirCamara(), cargarModelos()]).then(listoParaVerificar);
+            mostrar('info', 'Verificando…', '');   // se ve si la respuesta tarda más de lo esperado
+            const ok = await enviar('/api/ingreso/verificar',
+                { descriptor: Array.from(deteccion.descriptor) },
+                'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
+
+            // SCRUM-28: evidencia de rapidez
+            if (ok) {
+                const tiempo = Math.round(performance.now() - inicioIntento);
+                console.log('Tiempo de verificación (ms):', tiempo);
+                el('tiempo').textContent = 'Tiempo de verificación: ' + tiempo + ' ms' +
+                (tiempo > META_RAPIDEZ ? ' (superó la meta de 3 s)' : '');
+            }
+        }
+
+
+        async function escanearQR() {
+        if (typeof jsQR === 'undefined') {
+            mostrar('error', 'No se pudo cargar el lector de QR', 'Recargue la página.');
+            return;
+        }
+        el('tiempo').textContent = '';
+        mostrar('info', 'Escaneando código QR…', 'Muestre su código QR frente a la cámara.');
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const inicio = performance.now();
+        let codigo = null;
+
+        while (performance.now() - inicio < TIEMPO_MAXIMO_QR) {
+            if (video.videoWidth) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);                       // foto del video en este instante
+            const imagen = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const lectura = jsQR(imagen.data, imagen.width, imagen.height, { inversionAttempts: 'dontInvert' });
+            if (lectura && lectura.data) { codigo = lectura.data; break; }
+            }
+            await dormir(250);
+        }
+
+        if (!codigo) {   // pasaron 15 s sin leer ningún QR
+            mostrar('error', 'No se detectó ningún código QR', 'Acerque el código a la cámara y pulse «Escanear código QR» de nuevo.');
+            return;
+        }
+
+        mostrar('info', 'Verificando…', '');
+        await enviar('/api/ingreso/qr', { codigo },
+            'Código QR no válido. Intente de nuevo o use otro método.');
+        }
+
+        async function verificarDocumento() {
+        const documento = inputDoc.value.trim();
+        if (!documento) {
+            mostrar('error', 'Falta el documento', 'Escriba su número de documento y pulse «Ingresar con documento».');
+            inputDoc.focus();
+            return;
+        }
+        el('tiempo').textContent = '';
+        mostrar('info', 'Verificando…', '');
+        await enviar('/api/ingreso/documento', { documento },
+            'Documento no registrado. Revise el número e intente de nuevo.');
+        }
+
+        btn.addEventListener('click', () => ejecutar(verificarRostro));
+        el('formDocumento').addEventListener('submit', e => {   // submit permite usar también la tecla Enter
+        e.preventDefault();
+        ejecutar(verificarDocumento);
+        });
+        btnQR.addEventListener('click', () => ejecutar(escanearQR));
+
+        mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
+        actualizarBotones();   // deja activo desde el inicio el ingreso por documento
+        Promise.all([abrirCamara(), cargarModelos()]).then(() => {
+        actualizarBotones();
+        if (modelosListos && camaraLista) {
+            mostrar('info', 'Listo', 'Ubíquese frente a la cámara y pulse «Verificar identidad».');
+        }
+        });
+
         </script>
     </body>
 </html>

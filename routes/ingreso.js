@@ -90,6 +90,13 @@ router.post('/qr', async (req, res) => {
     const [filas] = await db.query(
       'SELECT id, nombre FROM estudiantes WHERE codigo_qr = ? AND activo = TRUE', [codigo.trim()]);
     await responderIntento(res, filas[0] || null, 'qr');
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+  
+  
 router.post('/documento', async (req, res) => {
   const { documento } = req.body || {};
   // la columna "documento" es VARCHAR(20)

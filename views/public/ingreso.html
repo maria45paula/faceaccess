@@ -29,6 +29,7 @@
     <body>
         <main>
             <h1>FaceAccess · Ingreso</h1>
+            <label class="voz" id="etiquetaVoz"><input type="checkbox" id="chkVoz" checked> Mensajes de voz</label>
             <video id="video" autoplay playsinline muted arial-label="vista de la camara"></video>
             <button id="btnVerificar" disabled>Verificar Identidad</button>
             <div id="resultado" class="resultado info" role="alert" aria-live="assertive">
@@ -38,9 +39,12 @@
             </div>
 
             <div id="tiempo"></div>
-            <p class="nota">Si el reconocimiento facial no funciona se utilizara otro metodo</p>
-            <p class="nota"><a href="/login.html">Acceso del personal</a></p>
-        </main>
+            <section class="alternativo" aria-labelledby="tituloAlt">
+                <h2 id="tituloAlt">Ingreso alternativo</h2>
+                <p>Si el reconocimiento facial no funciona, puede ingresar con su código QR o con su documento. El resultado y el trato son los mismos.</p>
+                <button id="btnQR" type="button" disabled>Escanear código QR</button>
+
+            </main>
 
         <script src="/js/face-api.js"></script>
         <script>

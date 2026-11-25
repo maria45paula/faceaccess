@@ -90,6 +90,16 @@ router.post('/qr', async (req, res) => {
     const [filas] = await db.query(
       'SELECT id, nombre FROM estudiantes WHERE codigo_qr = ? AND activo = TRUE', [codigo.trim()]);
     await responderIntento(res, filas[0] || null, 'qr');
+router.post('/documento', async (req, res) => {
+  const { documento } = req.body || {};
+  // la columna "documento" es VARCHAR(20)
+  if (typeof documento !== 'string' || !documento.trim() || documento.trim().length > 20) {
+    return res.status(400).json({ error: 'No se recibió un número de documento válido' });
+  }
+  try {
+    const [filas] = await db.query(
+      'SELECT id, nombre FROM estudiantes WHERE documento = ? AND activo = TRUE', [documento.trim()]);
+    await responderIntento(res, filas[0] || null, 'documento');
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Error del servidor' });

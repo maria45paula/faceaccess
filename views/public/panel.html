@@ -94,6 +94,16 @@
     </section>
   </main>
 
+    <dialog id="dlgQR" aria-labelledby="tituloQR">
+    <h2 id="tituloQR">Código QR</h2>
+    <img id="imgQR" alt="">
+    <p>Con este código el estudiante puede ingresar si el reconocimiento facial no funciona.</p>
+    <div class="acciones" style="justify-content:center">
+      <a id="descargarQR" class="boton" href="#" download="qr.png">Descargar QR</a>
+      <button id="btnCerrarQR" type="button" class="gris">Cerrar</button>
+    </div>
+  </dialog>
+
   <script src="/js/face-api.js"></script>
   <script>
     let editandoId = null;     // null = registrando, número = editando ese estudiante
@@ -278,6 +288,18 @@
       avisar('Estudiante eliminado.', 'ok');
       cargarLista();
     }
+
+    function verQR(e) {
+      const url = '/api/estudiantes/' + e.id + '/qr';
+      el('tituloQR').textContent = 'Código QR de ' + e.nombre;
+      el('imgQR').src = url;
+      el('imgQR').alt = 'Código QR de ' + e.nombre;
+      el('descargarQR').href = url;
+      el('descargarQR').download = 'qr-' + e.documento.replace(/[^\w-]/g, '_') + '.png';
+      el('dlgQR').showModal();
+    }
+    el('btnCerrarQR').addEventListener('click', () => el('dlgQR').close());
+
 
     cargarModelos();
     verificarSesion().then(cargarLista);

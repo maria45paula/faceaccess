@@ -1,6 +1,18 @@
-/* SCRUM-26: texto grande y contraste alto.
-   Lo usan las 4 pantallas (login, panel, historial e ingreso). Los dos modos se activan con la barra
-   de arriba, que crea accesibilidad.js poniendo una clase en <html>: "texto-grande" o "alto-contraste". */
+/**
+*accesibilidad.css
+*
+*Estilos de accesibilidad (SCRUM-26): texto grande y alto contraste
+*Lo usan las 4 pantallas: login, panel, historial e ingreso 
+*
+*Funcionamiento:
+*  Los dos modos se activan con la barra de arriba, que crea
+*  accesibilidad.js poniendo una clase en <html>:
+*  "texto-grande"   agranda todo el texto
+*  "alto contraste"  fondo negro, letras blancas y acentos amarillos
+*
+* @author Alejandro
+* @version 1.0
+*/
 
 /* ---------- Barra con los dos botones ---------- */
 .fa-barra { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; align-self: stretch;
@@ -13,7 +25,7 @@
    Las pantallas definen sus tamaños en rem, así que al subir el tamaño de la raíz crece todo el texto. */
 html.texto-grande { font-size: 150%; }
 
-/* ---------- Alto contraste: fondo negro, letras blancas y acentos amarillos ----------
+/* Alto contraste: fondo negro, letras blancas y acentos amarillos ----------
    Primero se cambian las variables de color que ya usan las pantallas... */
 html.alto-contraste { --fondo: #000; --texto: #fff; --borde: #fff; --primario: #ffe600;
                       --ok: #7dff7d; --error: #ff8a8a; --peligro: #ff8a8a; --info: #000; }

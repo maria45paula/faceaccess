@@ -7,16 +7,17 @@
   <style>
     :root { --texto:#111; --primario:#0b4f8a; --peligro:#a40000; --ok:#0a6b2d; --borde:#444; }
     * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; font-size: 18px; color: var(--texto); margin: 0; background: #fff; }
+    body { font-family: Arial, sans-serif; font-size: 1.125rem; color: var(--texto); margin: 0; background: #fff; }
     header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
              padding: 14px 20px; background: var(--primario); color: #fff; }
-    header h1 { margin: 0; font-size: 24px; }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header a { color: #fff; font-weight: bold; margin-right: 12px; }
     main { max-width: 900px; margin: 0 auto; padding: 20px; }
     section { border: 2px solid var(--borde); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
     h2 { margin-top: 0; }
     label { display: block; font-weight: bold; margin: 14px 0 6px; }
-    input[type=text] { width: 100%; font-size: 18px; padding: 10px; border: 2px solid var(--borde); border-radius: 8px; }
-    button { font-size: 18px; padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; background: var(--primario); }
+    input[type=text] { width: 100%; font-size: 1.125rem; padding: 10px; border: 2px solid var(--borde); border-radius: 8px; }
+    button { font-size: 1.125rem; padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; background: var(--primario); }
     button.peligro { background: var(--peligro); }
     button.gris { background: #555; }
     button.salir { background: #fff; color: var(--primario); font-weight: bold; }
@@ -35,6 +36,11 @@
     th { background: #e8eef5; }
     td img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
     td.acc { display: flex; gap: 8px; flex-wrap: wrap; }
+    .boton { display: inline-block; font-size: 1.125rem; padding: 10px 16px; border-radius: 8px; background: var(--primario);
+             color: #fff; text-decoration: none; }
+    dialog { border: 3px solid var(--borde); border-radius: 12px; padding: 24px; max-width: 420px; text-align: center; }
+    dialog img { width: 100%; max-width: 320px; height: auto; border: 2px solid var(--borde); }
+    dialog h2 { font-size: 1.375rem; }
     .oculto { display: none; }
     .tabla-scroll { overflow-x: auto; }
   </style>
@@ -204,6 +210,8 @@
         bEditar.addEventListener('click', () => iniciarEdicion(e));
         const bEliminar = document.createElement('button');
         bEliminar.textContent = 'Eliminar';
+        const bEliminar = document.createElement('button');
+        bEliminar.textContent = 'Eliminar';
         bEliminar.className = 'peligro';
         bEliminar.addEventListener('click', () => eliminar(e));
         celdaAcc.append(bEditar, bEliminar);
@@ -280,5 +288,7 @@
     cargarModelos();
     verificarSesion().then(cargarLista);
   </script>
+
+  //hola
 </body>
 </html>

@@ -17,6 +17,9 @@ app.use(session({
   cookie: { httpOnly: true, maxAge: 1000 * 60 * 30 }   // la sesión dura 30 minutos
 }));
 
+app.get('/js/jsQR.js', (req, res) => res.sendFile(require.resolve('jsqr')));
+
+
 app.use(express.static(path.join(__dirname, 'views', 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/estudiantes', require('./routes/estudiantes'));

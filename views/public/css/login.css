@@ -1,0 +1,64 @@
+:root {
+      --azul: #287fbd;
+      --azul-oscuro: #14558f;
+      --azul-profundo: #103f70;
+      --texto: #17334c;
+      --borde: #c9ddea;
+      --error: #a40000;
+      --sombra: 0 18px 45px rgba(22, 73, 119, .2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh; margin: 0; padding: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: Arial, Helvetica, sans-serif; color: var(--texto);
+      background: linear-gradient(125deg, #6eabe5 0%, #8cccf1 48%, #b1eafa 100%);
+    }
+    .login {
+      width: min(100%, 430px); padding: 34px clamp(22px, 6vw, 42px) 30px;
+      border: 1px solid rgba(255,255,255,.85); border-radius: 25px;
+      background: rgba(255,255,255,.94); box-shadow: var(--sombra);
+      text-align: center;
+    }
+    .logo {
+      width: 126px; height: 126px; margin: 0 auto 17px;
+      display: grid; place-items: center; overflow: hidden;
+      border: 3px solid var(--azul-profundo); border-radius: 50%;
+      background: #fff; color: var(--azul-oscuro);
+      font-size: 34px; font-weight: 800; letter-spacing: -2px;
+    }
+    .marca { margin: 0; color: var(--azul-profundo); font-size: 29px; font-weight: 800; }
+    .marca span { color: #28a5d4; }
+    .subtitulo { margin: 7px 0 27px; color: #668198; font-size: 14px; }
+    .campo { margin: 0 0 17px; text-align: left; }
+    label { display: block; margin: 0 0 7px 5px; color: #31536e; font-size: 14px; font-weight: 700; }
+    input {
+      display: block; width: 100%; min-height: 48px; padding: 12px 18px;
+      border: 1.5px solid var(--borde); border-radius: 999px;
+      background: #fff; color: var(--texto); font: inherit; font-size: 16px;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(40,127,189,.15); }
+    button {
+      width: 100%; min-height: 49px; margin-top: 9px; padding: 12px 20px;
+      border: 1px solid #0f5794; border-radius: 999px;
+      background: linear-gradient(180deg, #4c9bd4, #1768a8);
+      box-shadow: 0 4px 0 #104b80, 0 8px 15px rgba(15,78,130,.2);
+      color: #fff; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800;
+      transition: transform .15s, filter .15s;
+    }
+    button:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #104b80; }
+    button:disabled { opacity: .65; cursor: wait; }
+    #mensaje {
+      min-height: 1.4em; margin: 18px 0 0; color: var(--error);
+      font-size: 14px; font-weight: 700; line-height: 1.4;
+    }
+    .pie { margin: 20px 0 0; color: #7890a3; font-size: 12px; }
+    :focus-visible { outline: 3px solid #ffb000; outline-offset: 3px; }
+    @media (max-width: 480px) {
+      body { padding: 14px; }
+      .login { padding-top: 28px; }
+      .logo { width: 108px; height: 108px; }
+    }
+  

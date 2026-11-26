@@ -2,387 +2,316 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <!-- SCRUM-30: el viewport hace que la página se adapte al celular -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FaceAccess · Ingreso</title>
-  <style>
-    :root {
-      --azul: #287fbd;
-      --azul-oscuro: #14558f;
-      --azul-profundo: #103f70;
-      --texto: #17334c;
-      --borde: #d2e2ee;
-      --ok: #08723b;
-      --error: #a40000;
-      --info: #eaf6ff;
-      --sombra: 0 12px 30px rgba(22, 73, 119, .16);
-    }
-    * { box-sizing: border-box; }
-    body {
-      min-height: 100vh; margin: 0; padding: 28px 16px 40px;
-      font-family: Arial, Helvetica, sans-serif; color: var(--texto);
-      background: linear-gradient(125deg, #6eabe5 0%, #8cccf1 48%, #b1eafa 100%);
-    }
-    .pagina { width: min(1100px, 100%); margin: 0 auto; }
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 14px; flex-wrap: wrap; margin-bottom: 22px; padding: 17px 22px;
-      border: 1px solid rgba(255,255,255,.7); border-radius: 20px;
-      background: rgba(255,255,255,.9); box-shadow: var(--sombra);
-    }
-    .marca { display: flex; align-items: center; gap: 13px; }
-    .logo {
-      width: 64px; height: 64px; display: grid; place-items: center;
-      border: 2px solid var(--azul-profundo); border-radius: 50%;
-      background: #fff; color: var(--azul-oscuro); font-size: 19px; font-weight: 800;
-      letter-spacing: -1px;
-    }
-    h1 { margin: 0; color: var(--azul-profundo); font-size: clamp(22px, 3vw, 29px); }
-    .subtitulo { margin: 5px 0 0; color: #58758d; font-size: 14px; }
-    .cabecera-derecha { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-    .voz { display: inline-flex; align-items: center; gap: 7px; color: #42637d; font-size: 14px; font-weight: 600; }
-    .voz input { accent-color: var(--azul); width: 17px; height: 17px; }
-    a { color: var(--azul-oscuro); font-weight: 700; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .introduccion { margin: 0 0 18px; text-align: center; color: #174c78; }
-    .introduccion h2 { margin: 0 0 7px; font-size: clamp(20px, 3vw, 25px); }
-    .introduccion p { margin: 0; font-size: 15px; }
-
-    .metodos {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px; align-items: stretch;
-    }
-    .metodo {
-      min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 13px;
-      border: 1px solid rgba(255,255,255,.9); border-radius: 20px;
-      background: rgba(255,255,255,.95); box-shadow: var(--sombra);
-    }
-    .metodo-cabecera { display: flex; align-items: center; gap: 11px; }
-    .icono-metodo {
-      width: 43px; height: 43px; flex: 0 0 43px; display: grid; place-items: center;
-      border-radius: 13px; background: #e5f4ff; color: var(--azul-oscuro);
-      font-size: 23px;
-    }
-    .metodo h3 { margin: 0; color: var(--azul-profundo); font-size: 18px; }
-    .numero { margin: 3px 0 0; color: #7b94a8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .descripcion { min-height: 42px; margin: 0; color: #587187; font-size: 14px; line-height: 1.5; }
-    video {
-      display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
-      border: 2px solid #c8ddeb; border-radius: 14px; background: #e5edf3;
-    }
-    button {
-      width: 100%; min-height: 46px; padding: 11px 16px;
-      border: 1px solid #0f5794; border-radius: 999px;
-      background: linear-gradient(180deg, #4c9bd4, #1768a8);
-      box-shadow: 0 4px 0 #104b80, 0 7px 13px rgba(15,78,130,.16);
-      color: #fff; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700;
-      transition: transform .15s, filter .15s;
-    }
-    button:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
-    button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #104b80; }
-    button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
-    input[type="text"] {
-      width: 100%; min-height: 46px; padding: 11px 15px;
-      border: 1.5px solid var(--borde); border-radius: 999px;
-      background: #fff; color: var(--texto); font: inherit; font-size: 15px;
-      outline: none;
-    }
-    input[type="text"]:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(40,127,189,.15); }
-    .form-documento { display: flex; flex-direction: column; gap: 9px; margin-top: auto; }
-    .form-documento label { color: #31536e; font-size: 14px; font-weight: 700; }
-    .nota-metodo {
-      margin-top: auto; padding: 11px 12px; border-radius: 12px;
-      background: #f0f8fd; color: #5a7890; font-size: 13px; line-height: 1.45;
-    }
-    .resultado {
-      margin-top: 20px; padding: 20px; text-align: center;
-      border: 1px solid #c9ddeb; border-radius: 20px;
-      background: rgba(255,255,255,.95); box-shadow: var(--sombra);
-    }
-    .resultado.ok { background: #e7f7ee; border-color: #9bd3b1; color: #075d30; }
-    .resultado.error { background: #fff0f0; border-color: #e2aaaa; color: #8c1111; }
-    .resultado .icono { font-size: 42px; line-height: 1; }
-    .resultado .titulo { margin: 7px 0; font-size: clamp(22px, 4vw, 30px); font-weight: 800; }
-    .resultado .detalle { margin: 0; font-size: 15px; line-height: 1.45; }
-    #tiempo { min-height: 1.3em; margin: 12px 0 0; text-align: center; color: #315b79; font-size: 13px; }
-    .pie { margin-top: 22px; text-align: center; font-size: 14px; }
-    :focus-visible { outline: 3px solid #ffb000; outline-offset: 3px; }
-
-    @media (max-width: 850px) {
-      .metodos { grid-template-columns: 1fr 1fr; }
-      .metodo-documento { grid-column: 1 / -1; }
-    }
-    @media (max-width: 580px) {
-      body { padding: 13px 10px 28px; }
-      header { padding: 14px; }
-      .logo { width: 54px; height: 54px; }
-      .cabecera-derecha { width: 100%; }
-      .metodos { grid-template-columns: 1fr; }
-      .metodo-documento { grid-column: auto; }
-      .metodo { padding: 17px; }
-      .descripcion { min-height: 0; }
-    }
-    </style>
+  <link rel="stylesheet" href="./css/ingreso.css">
 </head>
-    <body>
-        <main>
-            <h1>FaceAccess · Ingreso</h1>
-            <label class="voz" id="etiquetaVoz"><input type="checkbox" id="chkVoz" checked> Mensajes de voz</label>
-            <video id="video" autoplay playsinline muted arial-label="vista de la camara"></video>
-            <button id="btnVerificar" disabled>Verificar Identidad</button>
-            <div id="resultado" class="resultado info" role="alert" aria-live="assertive">
-                <div class="icono" id="icono">..</div>
-                <div class="titulo" id="titulo">Cargando..</div>
-                <p class="detalle" id="detalle">Preparando el sistema</p>
-            </div>
+<body>
+  <main class="pagina">
+    <header>
+      <div class="marca">
+        <div class="logo" aria-hidden="true">FA</div>
+        <div>
+          <h1>FaceAccess · Ingreso</h1>
+          <p class="subtitulo">Sistema de control de acceso</p>
+        </div>
+      </div>
 
-            <div id="tiempo"></div>
-            <section class="alternativo" aria-labelledby="tituloAlt">
-                <h2 id="tituloAlt">Ingreso alternativo</h2>
-                <p>Si el reconocimiento facial no funciona, puede ingresar con su código QR o con su documento. El resultado y el trato son los mismos.</p>
-                <button id="btnQR" type="button" disabled>Escanear código QR</button>
+      <div class="cabecera-derecha">
+        <label class="voz" id="etiquetaVoz">
+          <input type="checkbox" id="chkVoz" checked>
+          Mensajes de voz
+        </label>
+        <a href="/login.html">Acceso del personal</a>
+      </div>
+    </header>
 
-        
-                <video id="video" autoplay playsinline muted arial-label="vista de la camara"></video>
-                <button id="btnVerificar" disabled>Verificar Identidad</button>
-                <div id="resultado" class="resultado info" role="alert" aria-live="assertive">
-                    <div class="icono" id="icono">..</div>
-                    <div class="titulo" id="titulo">Cargando..</div>
-                    <p class="detalle" id="detalle">Preparando el sistema</p>
-                </div>
+    <section class="introduccion">
+      <h2>Seleccione su método de ingreso</h2>
+      <p>Puede identificarse mediante cualquiera de las tres opciones disponibles.</p>
+    </section>
 
-                <div id="tiempo"></div>
-                
-                <form id="formDocumento">
-                    <label for="documento">Número de documento</label>
-                    <input id="documento" type="text" autocomplete="off">
-                    <button id="btnDocumento" type="submit">Ingresar con documento</button>
-                </form>
-            </section>
-            <p class="nota"><a href="/login.html">Acceso del personal</a></p>
-        </main>
+    <section class="metodos" aria-label="Métodos de ingreso">
+      <article class="metodo">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">◎</div>
+          <div>
+            <p class="numero">Método 01</p>
+            <h3>Reconocimiento facial</h3>
+          </div>
+        </div>
+        <p class="descripcion">Ubíquese frente a la cámara, mire al frente y verifique su identidad.</p>
+        <video id="video" autoplay playsinline muted aria-label="Vista de la cámara"></video>
+        <button id="btnVerificar" type="button" disabled>Verificar identidad</button>
+      </article>
 
-        <script src="/js/face-api.js"></script>
-        <script src="/js/jsQR.js"></script>
-        <script>
-            const el= id => document.getElementById(id);
-            const video =el('video');
-            const btn =el('btnVerificar');
-            const btnQR = el('btnQR');
-            const btnDoc = el('btnDocumento');
-            const inputDoc = el('documento');
-            const TIEMPO_MAXIMO_BUSQUEDA=10000;
-            const TIEMPO_MAXIMO_QR = 15000; 
-            const META_RAPIDEZ =3000;
-            let modelosListos=false;
-            let camaraLista=false;
-            let ocupado = false;  
+      <article class="metodo">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">▦</div>
+          <div>
+            <p class="numero">Método 02</p>
+            <h3>Código QR</h3>
+          </div>
+        </div>
+        <p class="descripcion">Muestre su código QR frente a la cámara para que el sistema lo pueda leer.</p>
+        <div class="nota-metodo">Este método utiliza la misma cámara que aparece en la tarjeta de reconocimiento facial.</div>
+        <button id="btnQR" type="button" disabled>Escanear código QR</button>
+      </article>
 
-            const dormir = ms => new Promise(r => setTimeout(r, ms));
+      <article class="metodo metodo-documento">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">▤</div>
+          <div>
+            <p class="numero">Método 03</p>
+            <h3>Número de documento</h3>
+          </div>
+        </div>
+        <p class="descripcion">Si no puede utilizar la cámara, escriba su número de documento registrado.</p>
+        <form id="formDocumento" class="form-documento">
+          <label for="documento">Número de documento</label>
+          <input id="documento" type="text" autocomplete="off" placeholder="Ingrese su documento">
+          <button id="btnDocumento" type="submit">Ingresar con documento</button>
+        </form>
+      </article>
+    </section>
 
-            const hayVoz = 'speechSynthesis' in window;
-            if (!hayVoz) el('etiquetaVoz').hidden = true;   // si el navegador no sabe hablar, se oculta la casilla
+    <section id="resultado" class="resultado info" role="alert" aria-live="assertive">
+      <div class="icono" id="icono">…</div>
+      <div class="titulo" id="titulo">Cargando…</div>
+      <p class="detalle" id="detalle">Preparando el sistema</p>
+    </section>
 
-            function hablar(texto) {
-            if (!hayVoz || !el('chkVoz').checked || !texto) return;
-            try {
-                const sintetizador = window.speechSynthesis;
-                if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();   // corta el mensaje anterior para no acumular
-                const mensaje = new SpeechSynthesisUtterance(texto.replace(/\(a\)|…/g, ''));   // quita "(a)" (se leería "Bienvenido a") y los puntos suspensivos
-                mensaje.lang = 'es-CO';
-                // Se prefiere una voz en español de Colombia; si no hay, cualquiera en español
-                const voces = sintetizador.getVoices();
-                const voz = voces.find(v => v.lang.replace('_', '-').toLowerCase() === 'es-co') ||
-                            voces.find(v => v.lang.toLowerCase().startsWith('es'));
-                if (voz) mensaje.voice = voz;
-                sintetizador.speak(mensaje);
-            } catch (e) {
-                console.error('No se pudo reproducir la voz:', e);   // si la voz falla, el mensaje escrito igual se ve
-            }
-            }
+    <div id="tiempo"></div>
 
-            el('chkVoz').addEventListener('change', () => {
-            if (!el('chkVoz').checked) window.speechSynthesis.cancel();   // silenciar corta lo que esté sonando
-            else hablar('Mensajes de voz activados');
-            });
+    <p class="pie">Si tiene inconvenientes para ingresar, comuníquese con el personal encargado.</p>
+  </main>
 
-            // Muestra un mensaje grande. tipo: 'info' 'ok' 'error'
-            function mostrar(tipo, titulo, detalle) {
-                el('resultado').className = 'resultado ' + tipo;
-                el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
-                el('titulo').textContent = titulo;
-                el('detalle').textContent = detalle || '';
-                hablar(detalle ? titulo + '. ' + detalle : titulo);
+  <script src="/js/face-api.js"></script>
+  <script src="/js/jsQR.js"></script>
+  <script>
+    const el = id => document.getElementById(id);
+    const video = el('video');
+    const btn = el('btnVerificar');
+    const btnQR = el('btnQR');
+    const btnDoc = el('btnDocumento');
+    const inputDoc = el('documento');
+    const TIEMPO_MAXIMO_BUSQUEDA = 10000;
+    const TIEMPO_MAXIMO_QR = 15000;
+    const META_RAPIDEZ = 3000;
+    let modelosListos = false;
+    let camaraLista = false;
+    let ocupado = false;
 
-            }
+    const dormir = ms => new Promise(r => setTimeout(r, ms));
 
-            function actualizarBotones() {
-                btn.disabled = ocupado || !(modelosListos && camaraLista);   // el rostro necesita cámara y modelos
-                btnQR.disabled = ocupado || !camaraLista;                    // el QR solo necesita la cámara
-                btnDoc.disabled = ocupado;                                   // el documento no necesita cámara ni modelos
-                }
+    const hayVoz = 'speechSynthesis' in window;
+    if (!hayVoz) el('etiquetaVoz').hidden = true;
 
-                // Ejecuta una verificación y bloquea los botones mientras dura (evita dos a la vez)
-                async function ejecutar(accion) {
-                ocupado = true;
-                actualizarBotones();
-                try { await accion(); } finally { ocupado = false; actualizarBotones(); }
-            }
+    function hablar(texto) {
+      if (!hayVoz || !el('chkVoz').checked || !texto) return;
+      try {
+        const sintetizador = window.speechSynthesis;
+        if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();
+        const mensaje = new SpeechSynthesisUtterance(texto.replace(/\(a\)|…/g, ''));
+        mensaje.lang = 'es-CO';
+        const voces = sintetizador.getVoices();
+        const voz = voces.find(v => v.lang.replace('_', '-').toLowerCase() === 'es-co') ||
+                    voces.find(v => v.lang.toLowerCase().startsWith('es'));
+        if (voz) mensaje.voice = voz;
+        sintetizador.speak(mensaje);
+      } catch (e) {
+        console.error('No se pudo reproducir la voz:', e);
+      }
+    }
 
-            async function abrirCamara() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    video.srcObject = stream;
-                    camaraLista = true;
-                } catch (e) {
-                    mostrar('error', 'No se pudo acceder a la cámara',
-                            'Revise los permisos del navegador. Si no es posible, use el ingreso alternativo.');
-                }
-            }
+    el('chkVoz').addEventListener('change', () => {
+      if (!el('chkVoz').checked) window.speechSynthesis.cancel();
+      else hablar('Mensajes de voz activados');
+    });
 
-            async function cargarModelos() {
-                try {
-                    await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-                    await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-                    await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-                    modelosListos = true;
-                } catch (e) {
-                    mostrar('error', 'No se pudo cargar el reconocimiento facial', 'Recargue la página.');
-                }
-            }
+    function mostrar(tipo, titulo, detalle) {
+      el('resultado').className = 'resultado ' + tipo;
+      el('icono').textContent = tipo === 'ok' ? '✔' : tipo === 'error' ? '✘' : '…';
+      el('titulo').textContent = titulo;
+      el('detalle').textContent = detalle || '';
+      hablar(detalle ? titulo + '. ' + detalle : titulo);
+    }
 
-            function mostrarAcceso(datos, textoDenegado) {
-                if (datos.resultado === 'permitido') {
-                    mostrar('ok', 'Acceso permitido', 'Bienvenido(a), ' + datos.nombre);
-                } else {
-                    mostrar('error', 'Acceso denegado', textoDenegado);
-                }
-            }
+    function actualizarBotones() {
+      btn.disabled = ocupado || !(modelosListos && camaraLista);
+      btnQR.disabled = ocupado || !camaraLista;
+      btnDoc.disabled = ocupado;
+    }
 
-            async function enviar(url, cuerpo, textoDenegado) {
-                try {
-                    const resp = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(cuerpo)
-                    });
-                    const datos = await resp.json();
-                    if (!resp.ok) {
-                    mostrar('error', 'No se pudo completar', datos.error + '. Intente de nuevo.');
-                    return false;
-                    }
-                    mostrarAcceso(datos, textoDenegado);
-                    return true;
-                } catch (e) {
-                    mostrar('error', 'No se pudo conectar con el servidor', 'Revise la conexión e intente de nuevo.');
-                    return false;
-                }
-            }
-        async function verificarRostro() {
-            el('tiempo').textContent = '';
-            mostrar('info', 'Buscando su rostro…', 'Mire a la cámara.');
-
-            const inicioBusqueda = performance.now();
-            let deteccion = null;
-            let inicioIntento = 0;
-            while (performance.now() - inicioBusqueda < TIEMPO_MAXIMO_BUSQUEDA) {
-                inicioIntento = performance.now();
-                deteccion = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-                .withFaceLandmarks()
-                .withFaceDescriptor();
-                if (deteccion) break;
-                await dormir(500);
-            }
-
-            if (!deteccion) {   // pasaron 10 s sin ver un rostro
-                mostrar('error', 'No se detectó su rostro', 'Acérquese o mejore la luz y pulse «Verificar identidad» de nuevo.');
-                return;
-            }
-
-            mostrar('info', 'Verificando…', '');   // se ve si la respuesta tarda más de lo esperado
-            const ok = await enviar('/api/ingreso/verificar',
-                { descriptor: Array.from(deteccion.descriptor) },
-                'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
-
-            // SCRUM-28: evidencia de rapidez
-            if (ok) {
-                const tiempo = Math.round(performance.now() - inicioIntento);
-                console.log('Tiempo de verificación (ms):', tiempo);
-                el('tiempo').textContent = 'Tiempo de verificación: ' + tiempo + ' ms' +
-                (tiempo > META_RAPIDEZ ? ' (superó la meta de 3 s)' : '');
-            }
-        }
-
-
-        async function escanearQR() {
-        if (typeof jsQR === 'undefined') {
-            mostrar('error', 'No se pudo cargar el lector de QR', 'Recargue la página.');
-            return;
-        }
-        el('tiempo').textContent = '';
-        mostrar('info', 'Escaneando código QR…', 'Muestre su código QR frente a la cámara.');
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const inicio = performance.now();
-        let codigo = null;
-
-        while (performance.now() - inicio < TIEMPO_MAXIMO_QR) {
-            if (video.videoWidth) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);                       // foto del video en este instante
-            const imagen = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const lectura = jsQR(imagen.data, imagen.width, imagen.height, { inversionAttempts: 'dontInvert' });
-            if (lectura && lectura.data) { codigo = lectura.data; break; }
-            }
-            await dormir(250);
-        }
-
-        if (!codigo) {   // pasaron 15 s sin leer ningún QR
-            mostrar('error', 'No se detectó ningún código QR', 'Acerque el código a la cámara y pulse «Escanear código QR» de nuevo.');
-            return;
-        }
-
-        mostrar('info', 'Verificando…', '');
-        await enviar('/api/ingreso/qr', { codigo },
-            'Código QR no válido. Intente de nuevo o use otro método.');
-        }
-
-        async function verificarDocumento() {
-        const documento = inputDoc.value.trim();
-        if (!documento) {
-            mostrar('error', 'Falta el documento', 'Escriba su número de documento y pulse «Ingresar con documento».');
-            inputDoc.focus();
-            return;
-        }
-        el('tiempo').textContent = '';
-        mostrar('info', 'Verificando…', '');
-        await enviar('/api/ingreso/documento', { documento },
-            'Documento no registrado. Revise el número e intente de nuevo.');
-        }
-
-        btn.addEventListener('click', () => ejecutar(verificarRostro));
-        el('formDocumento').addEventListener('submit', e => {   // submit permite usar también la tecla Enter
-        e.preventDefault();
-        ejecutar(verificarDocumento);
-        });
-        btnQR.addEventListener('click', () => ejecutar(escanearQR));
-
-        mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
-        actualizarBotones();   // deja activo desde el inicio el ingreso por documento
-        Promise.all([abrirCamara(), cargarModelos()]).then(() => {
+    async function ejecutar(accion) {
+      ocupado = true;
+      actualizarBotones();
+      try {
+        await accion();
+      } finally {
+        ocupado = false;
         actualizarBotones();
-        if (modelosListos && camaraLista) {
-            mostrar('info', 'Listo', 'Ubíquese frente a la cámara y pulse «Verificar identidad».');
-        }
+      }
+    }
+
+    async function abrirCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        camaraLista = true;
+      } catch (e) {
+        mostrar('error', 'No se pudo acceder a la cámara',
+          'Revise los permisos del navegador. Si no es posible, use el ingreso alternativo.');
+      }
+    }
+
+    async function cargarModelos() {
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        modelosListos = true;
+      } catch (e) {
+        mostrar('error', 'No se pudo cargar el reconocimiento facial', 'Recargue la página.');
+      }
+    }
+
+    function mostrarAcceso(datos, textoDenegado) {
+      if (datos.resultado === 'permitido') {
+        mostrar('ok', 'Acceso permitido', 'Bienvenido(a), ' + datos.nombre);
+      } else {
+        mostrar('error', 'Acceso denegado', textoDenegado);
+      }
+    }
+
+    async function enviar(url, cuerpo, textoDenegado) {
+      try {
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cuerpo)
         });
+        const datos = await resp.json();
 
-        </script>
-    </body>
+        if (!resp.ok) {
+          mostrar('error', 'No se pudo completar', datos.error + '. Intente de nuevo.');
+          return false;
+        }
+
+        mostrarAcceso(datos, textoDenegado);
+        return true;
+      } catch (e) {
+        mostrar('error', 'No se pudo conectar con el servidor', 'Revise la conexión e intente de nuevo.');
+        return false;
+      }
+    }
+
+    async function verificarRostro() {
+      el('tiempo').textContent = '';
+      mostrar('info', 'Buscando su rostro…', 'Mire a la cámara.');
+
+      const inicioBusqueda = performance.now();
+      let deteccion = null;
+      let inicioIntento = 0;
+
+      while (performance.now() - inicioBusqueda < TIEMPO_MAXIMO_BUSQUEDA) {
+        inicioIntento = performance.now();
+        deteccion = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+        if (deteccion) break;
+        await dormir(500);
+      }
+
+      if (!deteccion) {
+        mostrar('error', 'No se detectó su rostro', 'Acérquese o mejore la luz y pulse «Verificar identidad» de nuevo.');
+        return;
+      }
+
+      mostrar('info', 'Verificando…', '');
+      const ok = await enviar('/api/ingreso/verificar',
+        { descriptor: Array.from(deteccion.descriptor) },
+        'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
+
+      if (ok) {
+        const tiempo = Math.round(performance.now() - inicioIntento);
+        console.log('Tiempo de verificación (ms):', tiempo);
+        el('tiempo').textContent = 'Tiempo de verificación: ' + tiempo + ' ms' +
+          (tiempo > META_RAPIDEZ ? ' (superó la meta de 3 s)' : '');
+      }
+    }
+
+    async function escanearQR() {
+      if (typeof jsQR === 'undefined') {
+        mostrar('error', 'No se pudo cargar el lector de QR', 'Recargue la página.');
+        return;
+      }
+
+      el('tiempo').textContent = '';
+      mostrar('info', 'Escaneando código QR…', 'Muestre su código QR frente a la cámara.');
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const inicio = performance.now();
+      let codigo = null;
+
+      while (performance.now() - inicio < TIEMPO_MAXIMO_QR) {
+        if (video.videoWidth) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0);
+          const imagen = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const lectura = jsQR(imagen.data, imagen.width, imagen.height, { inversionAttempts: 'dontInvert' });
+          if (lectura && lectura.data) {
+            codigo = lectura.data;
+            break;
+          }
+        }
+        await dormir(250);
+      }
+
+      if (!codigo) {
+        mostrar('error', 'No se detectó ningún código QR', 'Acerque el código a la cámara y pulse «Escanear código QR» de nuevo.');
+        return;
+      }
+
+      mostrar('info', 'Verificando…', '');
+      await enviar('/api/ingreso/qr', { codigo },
+        'Código QR no válido. Intente de nuevo o use otro método.');
+    }
+
+    async function verificarDocumento() {
+      const documento = inputDoc.value.trim();
+      if (!documento) {
+        mostrar('error', 'Falta el documento', 'Escriba su número de documento y pulse «Ingresar con documento».');
+        inputDoc.focus();
+        return;
+      }
+
+      el('tiempo').textContent = '';
+      mostrar('info', 'Verificando…', '');
+      await enviar('/api/ingreso/documento', { documento },
+        'Documento no registrado. Revise el número e intente de nuevo.');
+    }
+
+    btn.addEventListener('click', () => ejecutar(verificarRostro));
+
+    el('formDocumento').addEventListener('submit', e => {
+      e.preventDefault();
+      ejecutar(verificarDocumento);
+    });
+
+    btnQR.addEventListener('click', () => ejecutar(escanearQR));
+
+    mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
+    actualizarBotones();
+
+    Promise.all([abrirCamara(), cargarModelos()]).then(() => {
+      actualizarBotones();
+      if (modelosListos && camaraLista) {
+        mostrar('info', 'Listo', 'Ubíquese frente a la cámara y pulse «Verificar identidad».');
+      }
+    });
+  </script>
+</body>
 </html>
-
-
-
-            

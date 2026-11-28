@@ -1,36 +1,45 @@
-// Servidor principal de FaceAccess
+// Punto de entrada de FaceAccess.
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 
-/** Aplicación principal de Express. */
 const app = express();
+const PORT = Number(process.env.PORT || 3000);
+const VIEWS = path.join(__dirname, 'views');
+const PUBLIC = path.join(__dirname, 'public');
 
-// Carpeta de fotos: está FUERA de "public", así nadie las abre escribiendo la URL (SCRUM-29)
 fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
 
-/**Lee el cuerpo JSON de las peticiones*/
-app.use(express.json({ limit: '5mb' }));   // la foto viaja como texto base64
-/** Maneja la sesión del usuario con una cookie que dura 30 minutos. */
+app.use(express.json({ limit: '5mb' }));
+
 app.use(session({
-  secret: 'cambien-esta-frase-secreta',
+  secret: process.env.SESSION_SECRET || 'cambiar-esta-clave-de-sesion',
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, maxAge: 1000 * 60 * 30 }   // la sesión dura 30 minutos
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 30,
+    sameSite: 'lax'
+  }
 }));
 
-/**Publica las pantallas Html, Js y modelos de la carpeta viewa/public */
-app.use(express.static(path.join(__dirname, 'views', 'public')));
-/**Rutas de la API: cada uno de estos modulos atiende su propio grupo de Urls. */
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/estudiantes', require('./routes/estudiantes'));
-app.use('/api/ingreso', require('./routes/ingreso'));
-app.use('/api/historial', require('./routes/historial'));   // SCRUM-23 / SCRUM-24
+// Archivos estáticos: CSS, JavaScript del navegador y modelos faciales.
+app.use(express.static(PUBLIC));
 
-/**Enciende el servidor en el puerto 3000. */
-function iniciarServidor() {
-  console.log('FaceAccess en http://localhost:3000/login.html');
-}
+// Vistas HTML.
+app.get('/', (req, res) => res.redirect('/ingreso.html'));
+app.get('/ingreso.html', (req, res) => res.sendFile(path.join(VIEWS, 'ingreso.html')));
+app.get('/login.html', (req, res) => res.sendFile(path.join(VIEWS, 'login.html')));
+app.get('/panel.html', (req, res) => res.sendFile(path.join(VIEWS, 'panel.html')));
+app.get('/historial.html', (req, res) => res.sendFile(path.join(VIEWS, 'historial.html')));
 
-app.listen(3000, () => console.log('FaceAccess en http://localhost:3000/login.html'));
+// API.
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/estudiantes', require('./routes/estudiantesRoutes'));
+app.use('/api/ingreso', require('./routes/ingresoRoutes'));
+app.use('/api/historial', require('./routes/historialRoutes'));
+
+app.listen(PORT, () => {
+  console.log(`FaceAccess funcionando en http://localhost:${PORT}`);
+});

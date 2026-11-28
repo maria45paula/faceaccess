@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const db = require('../db');
+const db = require('../config/db');
 
 // Distancia máxima para aceptar un rostro. Más bajo = más estricto; más alto = deja pasar a más gente.
 // 0.6 es el valor típico de face-api; ajústenlo probando con ustedes mismos.

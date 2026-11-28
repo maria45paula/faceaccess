@@ -3,52 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FaceAccess · Iniciar sesión</title>
-  <link rel="stylesheet" href="./css/login.css">
+  <title>FaceAccess · Ingreso</title>
+  <link rel="stylesheet" href="/css/ingreso.css">
 </head>
 <body>
-  <main>
-    <h1>FaceAccess</h1>
-    <label for="usuario">Usuario</label>
-    <input id="usuario" type="text" autocomplete="username">
-    <label for="contrasena">Contraseña</label>
-    <input id="contrasena" type="password" autocomplete="current-password">
-    <button id="entrar">Iniciar sesión</button>
-    <p id="mensaje" role="alert" aria-live="assertive"></p>
+  <main class="pagina">
+    <header>
+      <div class="marca">
+        <div class="logo" aria-hidden="true">FA</div>
+        <div>
+          <h1>FaceAccess · Ingreso</h1>
+          <p class="subtitulo">Sistema de control de acceso</p>
+        </div>
+      </div>
+
+      <div class="cabecera-derecha">
+        <label class="voz" id="etiquetaVoz">
+          <input type="checkbox" id="chkVoz" checked>
+          Mensajes de voz
+        </label>
+        <a href="/login.html">Acceso del personal</a>
+      </div>
+    </header>
+
+    <section class="introduccion">
+      <h2>Seleccione su método de ingreso</h2>
+      <p>Puede identificarse mediante cualquiera de las tres opciones disponibles.</p>
+    </section>
+
+    <section class="metodos" aria-label="Métodos de ingreso">
+      <article class="metodo">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">◎</div>
+          <div>
+            <p class="numero">Método 01</p>
+            <h3>Reconocimiento facial</h3>
+          </div>
+        </div>
+        <p class="descripcion">Ubíquese frente a la cámara, mire al frente y verifique su identidad.</p>
+        <video id="video" autoplay playsinline muted aria-label="Vista de la cámara"></video>
+        <button id="btnVerificar" type="button" disabled>Verificar identidad</button>
+      </article>
+
+      <article class="metodo">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">▦</div>
+          <div>
+            <p class="numero">Método 02</p>
+            <h3>Código QR</h3>
+          </div>
+        </div>
+        <p class="descripcion">Muestre su código QR frente a la cámara para que el sistema lo pueda leer.</p>
+        <div class="nota-metodo">Este método utiliza la misma cámara que aparece en la tarjeta de reconocimiento facial.</div>
+        <button id="btnQR" type="button" disabled>Escanear código QR</button>
+      </article>
+
+      <article class="metodo metodo-documento">
+        <div class="metodo-cabecera">
+          <div class="icono-metodo" aria-hidden="true">▤</div>
+          <div>
+            <p class="numero">Método 03</p>
+            <h3>Número de documento</h3>
+          </div>
+        </div>
+        <p class="descripcion">Si no puede utilizar la cámara, escriba su número de documento registrado.</p>
+        <form id="formDocumento" class="form-documento">
+          <label for="documento">Número de documento</label>
+          <input id="documento" type="text" autocomplete="off" placeholder="Ingrese su documento">
+          <button id="btnDocumento" type="submit">Ingresar con documento</button>
+        </form>
+      </article>
+    </section>
+
+    <section id="resultado" class="resultado info" role="alert" aria-live="assertive">
+      <div class="icono" id="icono">…</div>
+      <div class="titulo" id="titulo">Cargando…</div>
+      <p class="detalle" id="detalle">Preparando el sistema</p>
+    </section>
+
+    <div id="tiempo"></div>
+
+    <p class="pie">Si tiene inconvenientes para ingresar, comuníquese con el personal encargado.</p>
   </main>
 
-  <script>
-    const mensaje = document.getElementById('mensaje');
-
-    async function iniciarSesion() {
-      mensaje.textContent = '';
-      const usuario = document.getElementById('usuario').value.trim();
-      const contrasena = document.getElementById('contrasena').value;
-
-      try{
-        const resp = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ usuario, contrasena })
-        });
-        const datos = await resp.json();
-
-        if (resp.ok) {
-          window.location.href = '/panel.html';     // éxito: entra al panel
-        } else {
-          mensaje.textContent = datos.error;        // fallo: muestra el mensaje del servidor
-        }
-      } catch(error){
-        mensaje.textContent='No se pudo conectar con el servidor. Intente de nuevo.'
-      }
-    }
-
-    document.getElementById('entrar').addEventListener('click', iniciarSesion);
-    document.getElementById('contrasena').addEventListener('keydown', e => {
-      if (e.key === 'Enter'){
-         iniciarSesion();
-      }
-    });
-  </script>
+  <script src="/js/face-api.js"></script>
+  <script src="/js/jsQR.js"></script>
+  <script src="/js/ingreso.js"></script>
 </body>
 </html>

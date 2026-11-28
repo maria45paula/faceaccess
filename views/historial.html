@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FaceAccess · Historial de ingresos</title>
-  <link rel="stylesheet" href="./css/historial.css">
+  <link rel="stylesheet" href="/css/historial.css">
   <link rel="stylesheet" href="/css/accesibilidad.css">
   <script src="/js/accesibilidad.js"></script>
 </head>
@@ -67,119 +67,6 @@
     </section>
   </main>
 
-  <script>
-    function el(id) {
-      return document.getElementById(id);
-    }    const METODOS = { rostro: 'Reconocimiento facial', qr: 'Código QR', documento: 'Documento' };
-
-    // Llamada a la API; si la sesión venció, vuelve al login
-    async function api(url, opciones) {
-      const resp = await fetch(url, opciones);
-      if (resp.status === 401) { window.location.href = '/login.html'; throw new Error('Sin sesión'); }
-      let datos;
-      try {
-        datos = await resp.json();
-      } catch (error) {
-        datos = {};
-      }
-      return { ok: resp.ok, datos: datos };
-    }
-
-    async function verificarSesion() {
-      const r = await api('/api/auth/me');
-      el('quien').textContent = r.datos.nombre + ' (' + r.datos.rol + ') ';
-    }
-
-    el('btnSalir').addEventListener('click', async () => {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      window.location.href = '/login.html';
-    });
-
-    function filtrosActivos() {
-      const q = new URLSearchParams();
-      const campos = ['desde', 'hasta', 'metodo', 'resultado', 'estudiante'];
-      let i;
-      for (i = 0; i < campos.length; i++) {
-        const id = campos[i];
-        const valor = el(id).value.trim();
-        if (valor) {
-          q.set(id, valor);
-        }
-      }
-      return q;
-    }
-
-
-
-    async function cargarHistorial() {
-      const filtros = filtrosActivos();
-      const r = await api('/api/historial' + (filtros.toString() ? '?' + filtros : ''));
-      const cuerpo = el('lista');
-      cuerpo.innerHTML = '';
-
-      if (!r.ok) {
-        el('total').textContent = r.datos.error || 'No se pudo cargar el historial.';
-        return;
-      }
-      el('total').textContent = r.datos.length + (r.datos.length === 1 ? ' ingreso' : ' ingresos');
-
-      if (!r.datos.length) {
-        const celda = cuerpo.insertRow().insertCell();
-        celda.colSpan = 5;
-        celda.textContent = filtros.toString() ? 'No hay ingresos que coincidan con los filtros.' : 'Todavía no hay ingresos registrados.';
-        return;
-      }
-
-      let posicion;
-      for (posicion = 0; posicion < r.datos.length; posicion++) {
-        const ingreso = r.datos[posicion];
-        const fila = cuerpo.insertRow();
-        fila.insertCell().textContent = ingreso.fecha_hora;      // textContent evita inyectar HTML
-
-        // Si no hay nombre, el intento no fue reconocido o el estudiante fue eliminado.
-        if (ingreso.nombre) {
-          fila.insertCell().textContent = ingreso.nombre;
-        } else if (ingreso.resultado === 'permitido') {
-          fila.insertCell().textContent = 'Estudiante eliminado';
-        } else {
-          fila.insertCell().textContent = 'No identificado';
-        }
-
-        fila.insertCell().textContent = ingreso.documento || '—';
-
-        if (METODOS[ingreso.metodo]) {
-          fila.insertCell().textContent = METODOS[ingreso.metodo];
-        } else {
-          fila.insertCell().textContent = ingreso.metodo;
-        }
-
-        const celdaResultado = fila.insertCell();
-        if (ingreso.resultado === 'permitido') {
-          celdaResultado.textContent = '✔ Permitido';
-        } else {
-          celdaResultado.textContent = '✘ Denegado';
-        }
-        celdaResultado.className = ingreso.resultado;
-      }
-    }
-
-    el('formFiltros').addEventListener('submit', e => {   // submit permite usar también la tecla Enter
-      e.preventDefault();
-      cargarHistorial();
-    });
-    el('btnLimpiar').addEventListener('click', () => {
-      el('formFiltros').reset();
-      cargarHistorial();
-    });
-
-    async function iniciarPagina() {
-      await verificarSesion();
-      await cargarHistorial();
-    }
-
-    iniciarPagina();
-    
-    
-  </script>
+  <script src="/js/historial.js"></script>
 </body>
 </html>

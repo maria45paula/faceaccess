@@ -27,6 +27,9 @@ app.use(session({
 // Archivos estáticos: CSS, JavaScript del navegador y modelos faciales.
 app.use(express.static(PUBLIC));
 
+// Permitir mostrar las fotografías de los estudiantes.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Vistas HTML.
 app.get('/', (req, res) => res.redirect('/ingreso.html'));
 app.get('/ingreso.html', (req, res) => res.sendFile(path.join(VIEWS, 'ingreso.html')));

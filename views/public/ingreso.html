@@ -102,11 +102,48 @@
     let camaraLista = false;
     let ocupado = false;
 
-    const dormir = ms => new Promise(r => setTimeout(r, ms));
-
+    function dormir(ms) {
+      return new Promise(function (resolver) {
+        setTimeout(resolver, ms);
+      });
+    }
     const hayVoz = 'speechSynthesis' in window;
-    if (!hayVoz) el('etiquetaVoz').hidden = true;
+    function hablar(texto) {
+      if (!hayVoz || !el('chkVoz').checked || !texto) return;
+      try {
+        const sintetizador = window.speechSynthesis;
+        if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();
+        const mensaje = new SpeechSynthesisUtterance(texto.replace(/\(a\)|…/g, ''));
+        mensaje.lang = 'es-CO';
+        const voces = sintetizador.getVoices();
+        let voz = null;
+        let i;
 
+        // Primero busca una voz en español de Colombia.
+        for (i = 0; i < voces.length; i++) {
+          const idioma = voces[i].lang.replace('_', '-').toLowerCase();
+          if (idioma === 'es-co') {
+            voz = voces[i];
+            break;
+          }
+        }
+
+        // Si no encuentra una voz colombiana, busca cualquier voz en español.
+        if (voz === null) {
+          for (i = 0; i < voces.length; i++) {
+            if (voces[i].lang.toLowerCase().startsWith('es')) {
+              voz = voces[i];
+              break;
+            }
+          }
+        }
+
+        if (voz !== null) mensaje.voice = voz;
+        sintetizador.speak(mensaje);
+      } catch (e) {
+        console.error('No se pudo reproducir la voz:', e);
+      }
+    }
     function hablar(texto) {
       if (!hayVoz || !el('chkVoz').checked || !texto) return;
       try {
@@ -124,9 +161,12 @@
       }
     }
 
-    el('chkVoz').addEventListener('change', () => {
-      if (!el('chkVoz').checked) window.speechSynthesis.cancel();
-      else hablar('Mensajes de voz activados');
+    el('chkVoz').addEventListener('change', function () {
+      if (!el('chkVoz').checked) {
+        window.speechSynthesis.cancel();
+      }else {
+         hablar('Mensajes de voz activados');
+      }
     });
 
     function mostrar(tipo, titulo, detalle) {
@@ -229,8 +269,15 @@
       }
 
       mostrar('info', 'Verificando…', '');
+      // Copia el descriptor del rostro en un arreglo normal.
+      const descriptor = [];
+      let posicion;
+      for (posicion = 0; posicion < deteccion.descriptor.length; posicion++) {
+        descriptor.push(deteccion.descriptor[posicion]);
+      }
+
       const ok = await enviar('/api/ingreso/verificar',
-        { descriptor: Array.from(deteccion.descriptor) },
+        { descriptor: descriptor },
         'No se reconoció su rostro. Intente de nuevo o use el ingreso alternativo.');
 
       if (ok) {
@@ -294,24 +341,33 @@
         'Documento no registrado. Revise el número e intente de nuevo.');
     }
 
-    btn.addEventListener('click', () => ejecutar(verificarRostro));
+    btn.addEventListener('click', function() {
+      ejecutar(verificarRostro);
+    });
 
     el('formDocumento').addEventListener('submit', e => {
-      e.preventDefault();
+      evento.preventDefault();
       ejecutar(verificarDocumento);
     });
 
-    btnQR.addEventListener('click', () => ejecutar(escanearQR));
+    btnQR.addEventListener('click', function() {
+      ejecutar(escanearQR)
+    });
 
     mostrar('info', 'Cargando…', 'Preparando la cámara y el reconocimiento facial.');
     actualizarBotones();
 
-    Promise.all([abrirCamara(), cargarModelos()]).then(() => {
+    async function iniciarPagina() {
+      // Espera a que la cámara y los modelos estén listos.
+      await Promise.all([abrirCamara(), cargarModelos()]);
       actualizarBotones();
+
       if (modelosListos && camaraLista) {
         mostrar('info', 'Listo', 'Ubíquese frente a la cámara y pulse «Verificar identidad».');
       }
-    });
+    }
+
+    iniciarPagina();
   </script>
 </body>
 </html>

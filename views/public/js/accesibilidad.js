@@ -29,7 +29,7 @@
       boton.append(etiqueta);
     }
 
-    boton.addEventListener('click', () => {
+    boton.addEventListener('click', function() {
       const activo = raiz.classList.toggle(clase);
       guardar(clave, activo);
       pintar();

@@ -16,12 +16,22 @@ function distancia(a, b) {
 }
 
 function descriptorValido(d) {
-  return Array.isArray(d) && d.length === 128 &&
-         d.every(n => typeof n === 'number' && Number.isFinite(n));
+  if (!Array.isArray(d) || d.length !== 128) {
+    return false;
+  }
+
+  for (var i = 0; i < d.length; i++) {
+    if (typeof d[i] !== 'number' || !Number.isFinite(d[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
-router.post('/verificar', async (req, res) => {
-  const { descriptor } = req.body || {};
+router.post('/verificar', async function (req, res) {
+  var datos = req.body || {};
+  var descriptor = datos.descriptor;  
   if (!descriptorValido(descriptor)) {
     return res.status(400).json({ error: 'No se recibió un rostro válido' });
   }
@@ -36,12 +46,22 @@ router.post('/verificar', async (req, res) => {
     // Se busca el rostro registrado más parecido
     let mejor = null;
     let mejorDistancia = Infinity;
-    for (const fila of filas) {
-      let guardado;
-      try { guardado = JSON.parse(fila.descriptor); } catch (e) { continue; }
-      if (!descriptorValido(guardado)) continue;
-      const d = distancia(descriptor, guardado);
-      if (d < mejorDistancia) { mejorDistancia = d; mejor = fila; }
+    for (var i = 0; i < filas.length; i++) {
+      var fila = filas[i];
+      var guardado;
+      try {
+        guardado = JSON.parse(fila.descriptor);
+      } catch (e) {
+        continue;
+      }
+      if (!descriptorValido(guardado)) {
+        continue;
+      }
+      var distanciaActual = distancia(descriptor, guardado);
+      if (distanciaActual < mejorDistancia) {
+        mejorDistancia = distanciaActual;
+        mejor = fila;
+      }
     }
 
     const permitido = mejor !== null && mejorDistancia < UMBRAL;
@@ -81,8 +101,10 @@ async function responderIntento(res, estudiante, metodo) {
   }
   res.json({ resultado, nombre: permitido ? estudiante.nombre : null });
 }
-router.post('/qr', async (req, res) => {
-  const { codigo } = req.body || {};
+router.post('/qr', async function (req, res) {
+  var datos = req.body || {};
+  var codigo = datos.codigo;
+
   if (typeof codigo !== 'string' || !codigo.trim() || codigo.length > 100) {
     return res.status(400).json({ error: 'No se recibió un código QR válido' });
   }
@@ -97,8 +119,9 @@ router.post('/qr', async (req, res) => {
 });
   
   
-router.post('/documento', async (req, res) => {
-  const { documento } = req.body || {};
+router.post('/documento', async function (req, res) {
+  var datos = req.body || {};
+  var documento = datos.documento;
   // la columna "documento" es VARCHAR(20)
   if (typeof documento !== 'string' || !documento.trim() || documento.trim().length > 20) {
     return res.status(400).json({ error: 'No se recibió un número de documento válido' });

@@ -78,7 +78,9 @@
     let descriptorFacial = null;   // los 128 números del rostro, calculados al tomar la foto
     let modelosListos = false;
 
-    const el = id => document.getElementById(id);
+    function el(id) {
+      return document.getElementById(id);
+    }
     const video = el('video');
 
     function avisar(texto, tipo) {
@@ -89,7 +91,12 @@
     async function api(url, opciones) {
       const resp = await fetch(url, opciones);
       if (resp.status === 401) { window.location.href = '/login.html'; throw new Error('Sin sesión'); }
-      const datos = await resp.json().catch(() => ({}));
+      var datos = {};
+      try {
+        datos = await resp.json();
+      } catch (error) {
+        datos = {};
+      }
       return { ok: resp.ok, datos };
     }
 
@@ -104,8 +111,12 @@
     });
 
     navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; })
-      .catch(() => avisar('No se pudo acceder a la cámara. Revise los permisos del navegador.', 'error'));
+      .then(function(stream){
+         video.srcObject = stream; 
+      })
+      .catch(function() {
+         avisar('No se pudo acceder a la cámara. Revise los permisos del navegador.', 'error')
+      });
 
     // Modelos de reconocimiento facial (se cargan una sola vez)
     async function cargarModelos() {
@@ -143,11 +154,16 @@
         return;
       }
 
-      descriptorFacial = Array.from(r.descriptor);   // Float32Array -> arreglo normal para enviarlo en JSON
+      descriptorFacial = [];
+      for (var i = 0; i < r.descriptor.length; i++) {
+        descriptorFacial.push(r.descriptor[i]);
+      }
+      // Se copia cada numero del descriptor a un arreglo normal para enviarlo en JSON.
       fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
       el('vista').src = fotoBase64;
       el('vista').classList.remove('oculto');
       avisar('Rostro detectado. Si la foto no se ve bien, puede tomarla de nuevo.', 'ok');
+    
     });
 
     async function cargarLista() {
@@ -161,7 +177,8 @@
         celda.textContent = 'Todavía no hay estudiantes registrados.';
         return;
       }
-      r.datos.forEach(e => {
+      for (var i = 0; i < r.datos.length; i++) {
+        let e = r.datos[i];
         const fila = cuerpo.insertRow();
 
         const celdaFoto = fila.insertCell();
@@ -178,15 +195,24 @@
         celdaAcc.className = 'acc';
         const bQR = document.createElement('button');
         bQR.textContent = 'Ver QR';
-        bQR.addEventListener('click', () => verQR(e));
+        bQR.addEventListener('click', function () {
+          verQR(e);
+        });
         const bEditar = document.createElement('button');
         bEditar.textContent = 'Editar';
-        bEditar.addEventListener('click', () => iniciarEdicion(e));
+        bEditar.addEventListener('click', function () {
+          iniciarEdicion(e);
+        });
         const bEliminar = document.createElement('button');
         bEliminar.textContent = 'Eliminar';
         bEliminar.className = 'peligro';
-        bEliminar.addEventListener('click', () => eliminar(e));
-        celdaAcc.append(bEditar, bQR, bEliminar);      });
+        bEliminar.addEventListener('click', function () {
+          eliminar(e);
+        });
+        celdaAcc.appendChild(bEditar);
+        celdaAcc.appendChild(bQR);
+        celdaAcc.appendChild(bEliminar);
+      }
     }
 
     el('btnGuardar').addEventListener('click', async () => {
@@ -231,7 +257,9 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    el('btnCancelar').addEventListener('click', () => limpiarFormulario(false));
+    el('btnCancelar').addEventListener('click', function() { 
+      limpiarFormulario(false)
+    });
 
     function limpiarFormulario(conservarMensaje) {
       editandoId = null;
@@ -265,11 +293,15 @@
       el('descargarQR').download = 'qr-' + e.documento.replace(/[^\w-]/g, '_') + '.png';
       el('dlgQR').showModal();
     }
-    el('btnCerrarQR').addEventListener('click', () => el('dlgQR').close());
+    el('btnCerrarQR').addEventListener('click', function(){ 
+      el('dlgQR').close()
+    });
 
 
     cargarModelos();
-    verificarSesion().then(cargarLista);
+    verificarSesion().then(function(){
+      cargarLista();
+    });
   </script>
 </body>
 </html>

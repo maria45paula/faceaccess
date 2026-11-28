@@ -68,15 +68,21 @@
   </main>
 
   <script>
-    const el = id => document.getElementById(id);
-    const METODOS = { rostro: 'Reconocimiento facial', qr: 'Código QR', documento: 'Documento' };
+    function el(id) {
+      return document.getElementById(id);
+    }    const METODOS = { rostro: 'Reconocimiento facial', qr: 'Código QR', documento: 'Documento' };
 
     // Llamada a la API; si la sesión venció, vuelve al login
     async function api(url, opciones) {
       const resp = await fetch(url, opciones);
       if (resp.status === 401) { window.location.href = '/login.html'; throw new Error('Sin sesión'); }
-      const datos = await resp.json().catch(() => ({}));
-      return { ok: resp.ok, datos };
+      let datos;
+      try {
+        datos = await resp.json();
+      } catch (error) {
+        datos = {};
+      }
+      return { ok: resp.ok, datos: datos };
     }
 
     async function verificarSesion() {
@@ -91,10 +97,15 @@
 
     function filtrosActivos() {
       const q = new URLSearchParams();
-      ['desde', 'hasta', 'metodo', 'resultado', 'estudiante'].forEach(id => {   // el id de cada campo = nombre del filtro
+      const campos = ['desde', 'hasta', 'metodo', 'resultado', 'estudiante'];
+      let i;
+      for (i = 0; i < campos.length; i++) {
+        const id = campos[i];
         const valor = el(id).value.trim();
-        if (valor) q.set(id, valor);
-      });
+        if (valor) {
+          q.set(id, valor);
+        }
+      }
       return q;
     }
 
@@ -119,17 +130,37 @@
         return;
       }
 
-      r.datos.forEach(i => {
+      let posicion;
+      for (posicion = 0; posicion < r.datos.length; posicion++) {
+        const ingreso = r.datos[posicion];
         const fila = cuerpo.insertRow();
-        fila.insertCell().textContent = i.fecha_hora;      // textContent evita inyectar HTML
-        // Sin nombre: o fue un intento no reconocido, o el estudiante se eliminó después de ingresar
-        fila.insertCell().textContent = i.nombre || (i.resultado === 'permitido' ? 'Estudiante eliminado' : 'No identificado');
-        fila.insertCell().textContent = i.documento || '—';
-        fila.insertCell().textContent = METODOS[i.metodo] || i.metodo;
+        fila.insertCell().textContent = ingreso.fecha_hora;      // textContent evita inyectar HTML
+
+        // Si no hay nombre, el intento no fue reconocido o el estudiante fue eliminado.
+        if (ingreso.nombre) {
+          fila.insertCell().textContent = ingreso.nombre;
+        } else if (ingreso.resultado === 'permitido') {
+          fila.insertCell().textContent = 'Estudiante eliminado';
+        } else {
+          fila.insertCell().textContent = 'No identificado';
+        }
+
+        fila.insertCell().textContent = ingreso.documento || '—';
+
+        if (METODOS[ingreso.metodo]) {
+          fila.insertCell().textContent = METODOS[ingreso.metodo];
+        } else {
+          fila.insertCell().textContent = ingreso.metodo;
+        }
+
         const celdaResultado = fila.insertCell();
-        celdaResultado.textContent = i.resultado === 'permitido' ? '✔ Permitido' : '✘ Denegado';   // ícono + texto
-        celdaResultado.className = i.resultado;
-      });
+        if (ingreso.resultado === 'permitido') {
+          celdaResultado.textContent = '✔ Permitido';
+        } else {
+          celdaResultado.textContent = '✘ Denegado';
+        }
+        celdaResultado.className = ingreso.resultado;
+      }
     }
 
     el('formFiltros').addEventListener('submit', e => {   // submit permite usar también la tecla Enter
@@ -141,7 +172,12 @@
       cargarHistorial();
     });
 
-    verificarSesion().then(cargarHistorial);
+    async function iniciarPagina() {
+      await verificarSesion();
+      await cargarHistorial();
+    }
+
+    iniciarPagina();
     
     
   </script>

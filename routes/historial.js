@@ -12,17 +12,25 @@ const METODOS = ['rostro', 'qr', 'documento'];
 const RESULTADOS = ['permitido', 'denegado'];
 
 // Un filtro solo cuenta si llegó como texto (así se evitan listas u objetos raros en la URL)
-const texto = v => (typeof v === 'string' ? v.trim() : '');
+function texto(valor) {
+  if (typeof valor === 'string') {
+    return valor.trim();
+  }
+  return '';
+}
 // Además del formato, revisa que el día exista (el 31 de febrero no existe). Se arma la fecha y se compara con lo escrito.
 function fechaValida(f) {
   if (!FECHA.test(f)) return false;
-  const [anio, mes, dia] = f.split('-').map(Number);
-  const fecha = new Date(Date.UTC(anio, mes - 1, dia));
+  var partes = f.split('-');
+  var anio = Number(partes[0]);
+  var mes = Number(partes[1]);
+  var dia = Number(partes[2]);
+  var fecha = new Date(Date.UTC(anio, mes - 1, dia));
   return fecha.getUTCFullYear() === anio && fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia;
 }
 
 
-router.get('/', async (req, res) => {
+router.get('/', async function (req, res) {
   const desde = texto(req.query.desde);
   const hasta = texto(req.query.hasta);
   const metodo = texto(req.query.metodo);
@@ -34,8 +42,8 @@ router.get('/', async (req, res) => {
   if (desde && hasta && desde > hasta) {
     return res.status(400).json({ error: 'La fecha "desde" no puede ser posterior a la fecha "hasta"' });
   }
-  if (metodo && !METODOS.includes(metodo)) return res.status(400).json({ error: 'El método no es válido' });
-  if (resultado && !RESULTADOS.includes(resultado)) return res.status(400).json({ error: 'El resultado no es válido' });
+  if (metodo && METODOS.indexOf(metodo) === -1) return res.status(400).json({ error: 'El método no es válido' });
+  if (resultado && RESULTADOS.indexOf(resultado) === -1) return res.status(400).json({ error: 'El resultado no es válido' });
 
   // Se arma el WHERE solo con los filtros que llegaron. Los valores van como parámetros (?), nunca pegados al SQL.
   const condiciones = [];

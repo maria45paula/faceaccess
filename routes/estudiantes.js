@@ -28,7 +28,7 @@ const RAIZ = path.join(__dirname, '..');
  * 
  *@returns {Array} Lista de estudiantes 
  */
-router.get('/', async (req, res) => {
+router.get('/', async function (req, res) {
   try {
     /**
      * consulta los estudiantesw y relaciona sus datos
@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
  * 
  * @param {string} req.params.id Identificador del estudiante 
  */
-router.get('/:id/foto', async (req, res) => {
+router.get('/:id/foto', async function (req, res) {
   try {
     /**
      * Busca la ruta de la fotografia asociada
@@ -101,7 +101,7 @@ router.get('/:id/foto', async (req, res) => {
  * 
  * @param {string} req.params.id Identificador del estudiante
  */
-router.get('/:id/qr', async (req, res) => {
+router.get('/:id/qr', async function (req, res) {
   try {
 
     /**
@@ -155,13 +155,18 @@ router.get('/:id/qr', async (req, res) => {
 });
 
 //registrar estudiante con autorización y foto
-router.post('/', async (req, res) => {
+router.post('/', async function (req, res) {
 
   /**
    * obtiene los datos enviados para registrar
    * al estudiante desde el cuerpo de la solicitud
    */
-  const { nombre, documento, autorizacion, foto, descriptor } = req.body || {};
+  var datos = req.body || {};
+  var nombre = datos.nombre;
+  var documento = datos.documento;
+  var autorizacion = datos.autorizacion;
+  var foto = datos.foto;
+  var descriptor = datos.descriptor;
 
   /**
    * Verifican que se hayan ingresado el nombre
@@ -192,12 +197,22 @@ router.post('/', async (req, res) => {
   }
   /**
    * comprueba que el descriptor facial sea un arreglo
-   * de extçactamente 128 numeros validos
+   * de exactamente 128 numeros validos
    * cada elemento debe ser un numero finito
    */
   
-  const descriptorOk = Array.isArray(descriptor) && descriptor.length === 128 &&
-                       descriptor.every(n => typeof n === 'number' && Number.isFinite(n));
+  var descriptorOk = true;
+  if (!Array.isArray(descriptor) || descriptor.length !== 128) {
+    descriptorOk = false;
+  } else {
+    for (var i = 0; i < descriptor.length; i++) {
+      if (typeof descriptor[i] !== 'number' || !Number.isFinite(descriptor[i])) {
+        descriptorOk = false;
+        break;
+      }
+    }
+  }
+  
   /**
    * Si el descriptor facial no cumple las condiciones 
    * devuelve un error indicado que debe tomarse
@@ -350,14 +365,15 @@ router.post('/', async (req, res) => {
    * @param {string} req.body.documento nuevo documento del estudiante
    */
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', async function (req, res) {
 
   /**
    * Obtien el nombre y el documento enviados
    * para actualizar los datos del estudiante
    */
-  const { nombre, documento } = req.body || {};
-
+  var datos = req.body || {};
+  var nombre = datos.nombre;
+  var documento = datos.documento;
   /**
    * Verifica que se hayan ingresado
    * el nombrew y el documento
@@ -411,14 +427,14 @@ router.put('/:id', async (req, res) => {
 });
 
 /**
- * Ruta para elimkinar un estudiante
+ * Ruta para eliminar un estudiante
  * elimina su datos de la base de datos y tambien su fotografia
  * 
  * @param {string} req.params.id idetificador estudiante
  */
 
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async function (req, res) {
 
   /** 
    * intenta consutar y eliminar al estudiante

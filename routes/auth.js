@@ -61,22 +61,19 @@ router.post('/login', async (req, res) => {
   }
 });
 /**
- * Cierra la sesiòn del usuario y eliminar los datos
- * que estaban asustados guaradados ens te*/
-
-
-/**
- * cierra la sesiòn de usuario y elimina los datos
+ * cierra la sesión de usuario y elimina los datos
  * que estaban guardadosen ella 
  * 
  * @return {object} confirma que la sesiòn fu cerrada */
-router.post('/logout', (req, res) => {
+router.post('/logout', function (req, res) {
 
   /**
    * Elimina la sesiòn actual y devuelve una respuesta
    * cuando termina el proceso
    */
-  req.session.destroy(() => res.json({ ok: true }));
+  req.session.destroy(function () {
+    res.json({ ok: true });
+  });
 });
 /**
  * Consulta los dtaos del usuario que tiene la sesiòn fallidad
@@ -85,7 +82,7 @@ router.post('/logout', (req, res) => {
 */
 
 
-router.get('/me', (req, res) => {
+router.get('/me', function (req, res) {
 
   /**
    * comprueba si existe un usuario guardado en la sesiòn
